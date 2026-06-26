@@ -943,7 +943,7 @@
         <div class="calc-grid">
           <div class="field">
             <label>Monthly DMs / Inquiries</label>
-            <input type="number" id="monthlyDMs" value="200" min="0" step="10">
+            <input type="number" id="monthlyDMs" value="100" min="0" step="10">
             <div class="hint">How many people message you per month</div>
           </div>
           <div class="field">
@@ -953,7 +953,7 @@
           </div>
           <div class="field">
             <label>Average Package Price ($)</label>
-            <input type="number" id="pkgPrice" value="2000" min="0" step="50">
+            <input type="number" id="pkgPrice" value="330" min="0" step="10">
           </div>
           <div class="field">
             <label>Expected Lead Growth After Launch (%)</label>
@@ -1089,7 +1089,7 @@
           <div class="price-card">
             <div class="popular-tag"></div>
             <div class="tier-label">Setup</div>
-            <div class="tier-price">$2,500</div>
+            <div class="tier-price">$4,000</div>
             <div class="tier-period">one-time · 50% upfront</div>
             <div class="tier-divider"></div>
             <ul>
@@ -1103,7 +1103,7 @@
           <div class="price-card featured">
             <div class="popular-tag">Recommended</div>
             <div class="tier-label">Monthly</div>
-            <div class="tier-price">$275</div>
+            <div class="tier-price">$350</div>
             <div class="tier-period">per month · after free period</div>
             <div class="tier-divider"></div>
             <ul>
@@ -1158,7 +1158,7 @@
             <div class="step-num">3</div>
             <div class="step-content">
               <h4>50% Upfront, Work Begins</h4>
-              <p>System delivered in ~10-12 weeks, tested and launched</p>
+              <p>System delivered in ~14-16 weeks, tested and launched</p>
             </div>
           </div>
           <div class="step-item">
@@ -1187,11 +1187,11 @@
   <script>
     const $ = id => document.getElementById(id);
 
-    const SETUP_COST = 2500;
-    const MONTHLY_COST = 275;
+    const SETUP_COST = 4000;
+    const MONTHLY_COST = 350;
     const FREE_MONTHS = 1;
     const CONV_MULTIPLIER = 2;
-    const BUILD_MONTHS = 3;
+    const BUILD_MONTHS = 4;
 
     function fmt(n) {
       if (n >= 1000000) return '$' + (n / 1000000).toFixed(1).replace(/\.0$/, '') + 'M';
