@@ -7,6 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
   <style>
     :root {
       /* Premium palette */
@@ -186,6 +187,14 @@
       color: var(--slate-light);
       margin-bottom: 0.6rem;
     }
+    .section-label i[data-lucide] {
+      width: 14px;
+      height: 14px;
+    }
+    .hero-badge i[data-lucide] {
+      width: 13px;
+      height: 13px;
+    }
     .section-title {
       font-size: 1.5rem;
       font-weight: 700;
@@ -273,9 +282,13 @@
       margin-top: 1.25rem;
     }
     .risk-callout .risk-icon {
-      font-size: 1.3rem;
       flex-shrink: 0;
       margin-top: 2px;
+    }
+    .risk-callout .risk-icon i[data-lucide] {
+      width: 22px;
+      height: 22px;
+      color: var(--red);
     }
     .risk-callout h4 {
       font-size: 0.85rem;
@@ -313,15 +326,22 @@
       transform: translateY(-1px);
     }
     .feature-icon {
-      width: 40px;
-      height: 40px;
+      width: 42px;
+      height: 42px;
       border-radius: 10px;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 1.15rem;
       flex-shrink: 0;
     }
+    .feature-icon i[data-lucide] {
+      width: 20px;
+      height: 20px;
+    }
+    .feature-icon.green i[data-lucide] { color: var(--emerald-dark); }
+    .feature-icon.blue i[data-lucide] { color: var(--blue); }
+    .feature-icon.amber i[data-lucide] { color: var(--amber); }
+    .feature-icon.red i[data-lucide] { color: var(--red); }
     .feature-icon.green { background: var(--emerald-glow); }
     .feature-icon.blue { background: var(--blue-glow); }
     .feature-icon.amber { background: var(--amber-glow); }
@@ -441,9 +461,17 @@
       box-shadow: var(--shadow);
     }
     .stat-card .stat-icon {
-      font-size: 1.2rem;
       margin-bottom: 0.4rem;
+      display: flex;
+      justify-content: center;
     }
+    .stat-card .stat-icon i[data-lucide] {
+      width: 22px;
+      height: 22px;
+    }
+    .stat-card.loss .stat-icon i[data-lucide] { color: var(--red); }
+    .stat-card.gain .stat-icon i[data-lucide] { color: var(--emerald); }
+    .stat-card.neutral .stat-icon i[data-lucide] { color: var(--slate-light); }
     .stat-card .stat-label {
       font-size: 0.68rem;
       font-weight: 600;
@@ -798,7 +826,7 @@
   <!-- ==================== HERO ==================== -->
   <div class="hero">
     <div class="hero-inner">
-      <div class="hero-badge">📊 Growth Proposal</div>
+      <div class="hero-badge"><i data-lucide="bar-chart-3"></i> Growth Proposal</div>
       <h1>Stop Losing Patients.<br>Start <em>Scaling</em>.</h1>
       <p>Every month without a system, potential patients slip through your DMs and never come back. Here's how we fix that.</p>
 
@@ -815,7 +843,7 @@
     <!-- ==================== PROBLEM vs SOLUTION ==================== -->
     <div class="section">
       <div class="card">
-        <div class="section-label">📋 The Reality</div>
+        <div class="section-label"><i data-lucide="clipboard-list"></i> The Reality</div>
         <div class="section-title">Manual Process vs. Automated System</div>
         <div class="section-desc">See what changes when you stop doing everything by hand.</div>
 
@@ -845,7 +873,7 @@
         </div>
 
         <div class="risk-callout">
-          <span class="risk-icon">🚨</span>
+          <span class="risk-icon"><i data-lucide="shield-alert"></i></span>
           <div>
             <h4>The Instagram Risk</h4>
             <p>If Instagram suspends your account tomorrow, you lose <strong>every patient contact, every conversation, every lead.</strong> This system stores all data on YOUR platform — independent from any social media.</p>
@@ -857,34 +885,34 @@
     <!-- ==================== FEATURES ==================== -->
     <div class="section">
       <div class="card">
-        <div class="section-label">🛠️ Deliverables</div>
+        <div class="section-label"><i data-lucide="package"></i> Deliverables</div>
         <div class="section-title">What You Get</div>
         <div class="section-desc">Everything you need to turn Instagram followers into paying, tracked patients.</div>
 
         <div class="features-grid">
           <div class="feature-item">
-            <div class="feature-icon green">🌐</div>
+            <div class="feature-icon green"><i data-lucide="globe"></i></div>
             <div>
               <h4>Landing Page Upgrade</h4>
               <p>Redesign & optimize your existing page — lead capture, WhatsApp integration, before/after gallery, conversion-focused layout</p>
             </div>
           </div>
           <div class="feature-item">
-            <div class="feature-icon blue">📋</div>
+            <div class="feature-icon blue"><i data-lucide="users"></i></div>
             <div>
               <h4>Patient Management</h4>
               <p>Track every patient: status, package, payments, notes, follow-ups — all in one clean dashboard</p>
             </div>
           </div>
           <div class="feature-item">
-            <div class="feature-icon amber">📱</div>
+            <div class="feature-icon amber"><i data-lucide="instagram"></i></div>
             <div>
               <h4>Social Media Pipeline</h4>
               <p>Auto-capture leads from Instagram, quick-reply templates, instant notification on new inquiries</p>
             </div>
           </div>
           <div class="feature-item">
-            <div class="feature-icon red">📊</div>
+            <div class="feature-icon red"><i data-lucide="trending-up"></i></div>
             <div>
               <h4>Business Analytics</h4>
               <p>Conversion rate, revenue tracking, top content performance, patient pipeline — at a glance</p>
@@ -897,7 +925,7 @@
     <!-- ==================== CALCULATOR ==================== -->
     <div class="section">
       <div class="card">
-        <div class="section-label">🧮 ROI Calculator</div>
+        <div class="section-label"><i data-lucide="calculator"></i> ROI Calculator</div>
         <div class="section-title">See How It Pays for Itself</div>
         <div class="section-desc">Enter your real numbers. Watch the math speak.</div>
 
@@ -950,24 +978,24 @@
     <!-- ==================== RESULTS ==================== -->
     <div class="section">
       <div class="card">
-        <div class="section-label">📈 Projection</div>
+        <div class="section-label"><i data-lucide="line-chart"></i> Projection</div>
         <div class="section-title">6-Month Revenue Comparison</div>
 
         <div class="stat-grid">
           <div class="stat-card loss">
-            <div class="stat-icon">📉</div>
+            <div class="stat-icon"><i data-lucide="trending-down"></i></div>
             <div class="stat-label">Without System</div>
             <div class="stat-value" id="revWithout">—</div>
             <div class="stat-sub">6-month revenue (flat)</div>
           </div>
           <div class="stat-card gain">
-            <div class="stat-icon">📈</div>
+            <div class="stat-icon"><i data-lucide="trending-up"></i></div>
             <div class="stat-label">With System</div>
             <div class="stat-value" id="revWith">—</div>
             <div class="stat-sub">6-month revenue (growing)</div>
           </div>
           <div class="stat-card gain">
-            <div class="stat-icon">💰</div>
+            <div class="stat-icon"><i data-lucide="wallet"></i></div>
             <div class="stat-label">Extra Revenue</div>
             <div class="stat-value" id="revExtra">—</div>
             <div class="stat-sub">money you'd otherwise lose</div>
@@ -976,19 +1004,19 @@
 
         <div class="stat-grid">
           <div class="stat-card neutral">
-            <div class="stat-icon">🔁</div>
+            <div class="stat-icon"><i data-lucide="user-check"></i></div>
             <div class="stat-label">Patients Saved / Month</div>
             <div class="stat-value" id="savedPatients">—</div>
             <div class="stat-sub">from better follow-up</div>
           </div>
           <div class="stat-card neutral">
-            <div class="stat-icon">⏱️</div>
+            <div class="stat-icon"><i data-lucide="clock"></i></div>
             <div class="stat-label">Pays for Itself In</div>
             <div class="stat-value" id="breakeven">—</div>
             <div class="stat-sub">based on extra revenue</div>
           </div>
           <div class="stat-card neutral">
-            <div class="stat-icon">🚀</div>
+            <div class="stat-icon"><i data-lucide="rocket"></i></div>
             <div class="stat-label">12-Month ROI</div>
             <div class="stat-value" id="roi12">—</div>
             <div class="stat-sub">return on investment</div>
@@ -999,7 +1027,7 @@
         <div class="roi-section">
           <div class="roi-bar-group">
             <div class="roi-bar-header">
-              <span>💸 System Cost (6 months)</span>
+              <span><i data-lucide="credit-card" style="width:14px;height:14px;display:inline-block;vertical-align:-2px;margin-right:4px;"></i>System Cost (6 months)</span>
               <span class="roi-amount" id="totalCostLabel">—</span>
             </div>
             <div class="roi-track">
@@ -1008,7 +1036,7 @@
           </div>
           <div class="roi-bar-group">
             <div class="roi-bar-header">
-              <span>💰 Extra Revenue Generated</span>
+              <span><i data-lucide="banknote" style="width:14px;height:14px;display:inline-block;vertical-align:-2px;margin-right:4px;"></i>Extra Revenue Generated</span>
               <span class="roi-amount" id="extraRevLabel">—</span>
             </div>
             <div class="roi-track">
@@ -1042,7 +1070,7 @@
     <!-- ==================== PRICING ==================== -->
     <div class="section">
       <div class="card" style="background: transparent; border: none; box-shadow: none; padding: 0;">
-        <div class="section-label" style="text-align:center; display:block;">💰 Investment</div>
+        <div class="section-label" style="text-align:center; display:block;"><i data-lucide="badge-dollar-sign"></i> Investment</div>
         <div class="section-title" style="text-align:center;">Simple, Transparent Pricing</div>
         <div class="section-desc" style="text-align:center; margin: 0 auto 2rem;">No hidden fees. No surprises. You know exactly what you're paying for.</div>
 
@@ -1096,7 +1124,7 @@
     <!-- ==================== NEXT STEPS ==================== -->
     <div class="section">
       <div class="card cta-section">
-        <div class="section-label" style="justify-content:center;">🤝 Next Steps</div>
+        <div class="section-label" style="justify-content:center;"><i data-lucide="handshake"></i> Next Steps</div>
         <div class="cta-tagline">Ready to Stop Losing Patients?</div>
         <div class="cta-sub">Here's how we move forward — simple and clear.</div>
 
@@ -1123,7 +1151,7 @@
             </div>
           </div>
           <div class="step-item">
-            <div class="step-num">🚀</div>
+            <div class="step-num">✓</div>
             <div class="step-content">
               <h4>Launch & Grow</h4>
               <p>Patients flow through the system. You scale without chaos.</p>
@@ -1300,6 +1328,9 @@
     }, { threshold: 0.1 });
 
     document.querySelectorAll('.card').forEach(el => observer.observe(el));
+
+    // Initialize Lucide icons
+    lucide.createIcons();
 
     calculate();
   </script>
