@@ -1,0 +1,707 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Project Roadmap — Hüseyin Ajuz Patient Management System</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    :root {
+      --bg: #FAF6F1;
+      --surface: #FFFDF9;
+      --text: #2D2A26;
+      --text-secondary: #7A756E;
+      --text-muted: #A8A29E;
+      --divider: rgba(0,0,0,0.06);
+      --teal: #2A9D8F;
+      --teal-hover: #238B80;
+      --teal-glow: rgba(42, 157, 143, 0.12);
+      --teal-soft: rgba(42, 157, 143, 0.06);
+      --coral: #E76F51;
+      --coral-glow: rgba(231, 111, 81, 0.10);
+      --hero-dark: #1E1B18;
+      --hero-light: #2D2A26;
+      --radius: 14px;
+      --radius-sm: 10px;
+      --shadow: 0 2px 20px rgba(45, 42, 38, 0.06);
+      --shadow-lg: 0 4px 30px rgba(45, 42, 38, 0.10);
+      --transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.65;
+      font-size: 0.9rem;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ── Grain Overlay ── */
+    .grain {
+      position: fixed; inset: 0; z-index: 9999;
+      pointer-events: none;
+      opacity: 0.06;
+      mix-blend-mode: overlay;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+      background-repeat: repeat;
+      background-size: 256px 256px;
+    }
+
+    .vignette {
+      position: fixed; inset: 0; z-index: 9998;
+      pointer-events: none;
+      background: radial-gradient(ellipse at center, transparent 50%, rgba(30,27,24,0.04) 100%);
+    }
+
+    /* ── Hero ── */
+    .hero {
+      background: linear-gradient(135deg, var(--hero-dark), var(--hero-light));
+      color: #fff;
+      padding: 5rem 2rem 4rem;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero::after {
+      content: '';
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      height: 120px;
+      background: linear-gradient(to top, var(--bg), transparent);
+    }
+
+    .hero-label {
+      font-size: 0.7rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: var(--teal);
+      margin-bottom: 1rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .hero-label::before, .hero-label::after {
+      content: '';
+      width: 24px;
+      height: 1px;
+      background: var(--teal);
+      opacity: 0.5;
+    }
+
+    .hero h1 {
+      font-family: 'DM Serif Display', serif;
+      font-size: 2.8rem;
+      font-weight: 400;
+      line-height: 1.2;
+      margin-bottom: 1rem;
+      max-width: 700px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .hero p {
+      font-size: 1rem;
+      color: rgba(255,255,255,0.65);
+      max-width: 540px;
+      margin: 0 auto;
+      line-height: 1.7;
+    }
+
+    /* ── Container ── */
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 0 2rem;
+    }
+
+    /* ── Narrative Intro ── */
+    .narrative {
+      padding: 4rem 0 3rem;
+      text-align: center;
+    }
+
+    .narrative h2 {
+      font-family: 'DM Serif Display', serif;
+      font-size: 1.6rem;
+      font-weight: 400;
+      margin-bottom: 1rem;
+      color: var(--text);
+    }
+
+    .narrative p {
+      color: var(--text-secondary);
+      max-width: 620px;
+      margin: 0 auto;
+      line-height: 1.8;
+    }
+
+    /* ── Timeline ── */
+    .timeline {
+      position: relative;
+      padding: 2rem 0 4rem;
+    }
+
+    .timeline::before {
+      content: '';
+      position: absolute;
+      left: 50%;
+      top: 0;
+      bottom: 0;
+      width: 2px;
+      background: linear-gradient(to bottom, var(--teal), var(--divider), var(--coral));
+      transform: translateX(-50%);
+      border-radius: 2px;
+    }
+
+    @media (max-width: 768px) {
+      .timeline::before {
+        left: 24px;
+      }
+    }
+
+    /* ── Milestone Block ── */
+    .milestone {
+      padding: 3rem 0;
+    }
+
+    .milestone-header {
+      text-align: center;
+      margin-bottom: 3rem;
+      position: relative;
+    }
+
+    .milestone-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.6rem;
+      padding: 0.5rem 1.2rem;
+      border-radius: 100px;
+      font-size: 0.7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      margin-bottom: 1rem;
+    }
+
+    .milestone-badge.m1 {
+      background: var(--teal-glow);
+      color: var(--teal);
+    }
+
+    .milestone-badge.m2 {
+      background: var(--coral-glow);
+      color: var(--coral);
+    }
+
+    .milestone-header h2 {
+      font-family: 'DM Serif Display', serif;
+      font-size: 2rem;
+      font-weight: 400;
+      margin-bottom: 0.75rem;
+    }
+
+    .milestone-header p {
+      color: var(--text-secondary);
+      max-width: 560px;
+      margin: 0 auto;
+      line-height: 1.7;
+    }
+
+    /* ── Slice Cards ── */
+    .slices {
+      display: grid;
+      gap: 1.5rem;
+    }
+
+    .slice {
+      background: var(--surface);
+      border-radius: var(--radius);
+      padding: 2rem;
+      box-shadow: var(--shadow);
+      transition: var(--transition);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .slice:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-lg);
+    }
+
+    .slice::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0;
+      width: 4px;
+      height: 100%;
+      border-radius: 4px 0 0 4px;
+    }
+
+    .slice.teal::before { background: var(--teal); }
+    .slice.coral::before { background: var(--coral); }
+
+    .slice-number {
+      font-size: 0.65rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      margin-bottom: 0.5rem;
+    }
+
+    .slice.teal .slice-number { color: var(--teal); }
+    .slice.coral .slice-number { color: var(--coral); }
+
+    .slice h3 {
+      font-family: 'DM Serif Display', serif;
+      font-size: 1.25rem;
+      font-weight: 400;
+      margin-bottom: 0.75rem;
+    }
+
+    .slice p {
+      color: var(--text-secondary);
+      line-height: 1.7;
+      margin-bottom: 1rem;
+    }
+
+    .slice-details {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      padding: 0.3rem 0.7rem;
+      border-radius: 100px;
+      font-size: 0.72rem;
+      font-weight: 500;
+      background: var(--bg);
+      color: var(--text-secondary);
+    }
+
+    .tag i { width: 12px; height: 12px; }
+
+    /* ── Connector Dot ── */
+    .dot {
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      margin: 0 auto 2rem;
+      position: relative;
+      z-index: 2;
+    }
+
+    .dot.teal { background: var(--teal); box-shadow: 0 0 0 4px var(--teal-glow); }
+    .dot.coral { background: var(--coral); box-shadow: 0 0 0 4px var(--coral-glow); }
+
+    /* ── Summary Stats ── */
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 1.2rem;
+      padding: 3rem 0;
+    }
+
+    .stat {
+      background: var(--surface);
+      border-radius: var(--radius);
+      padding: 1.5rem;
+      text-align: center;
+      box-shadow: var(--shadow);
+    }
+
+    .stat-value {
+      font-family: 'DM Serif Display', serif;
+      font-size: 2rem;
+      color: var(--teal);
+      margin-bottom: 0.25rem;
+    }
+
+    .stat-label {
+      font-size: 0.7rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--text-muted);
+    }
+
+    /* ── Footer ── */
+    .footer {
+      text-align: center;
+      padding: 3rem 2rem 4rem;
+      border-top: 1px solid var(--divider);
+      margin-top: 2rem;
+    }
+
+    .footer p {
+      color: var(--text-muted);
+      font-size: 0.8rem;
+    }
+
+    .footer .cta {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-top: 1.5rem;
+      padding: 0.8rem 2rem;
+      background: var(--teal);
+      color: #fff;
+      border: none;
+      border-radius: 100px;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      transition: var(--transition);
+      box-shadow: 0 4px 20px rgba(42, 157, 143, 0.25);
+    }
+
+    .footer .cta:hover {
+      background: var(--teal-hover);
+      transform: translateY(-1px);
+      box-shadow: 0 6px 24px rgba(42, 157, 143, 0.3);
+    }
+
+    /* ── Divider ── */
+    .section-divider {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 2rem 0;
+    }
+
+    .section-divider span {
+      font-size: 0.65rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: var(--text-muted);
+      white-space: nowrap;
+    }
+
+    .section-divider::before,
+    .section-divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--divider);
+    }
+
+    /* ── Animations ── */
+    .fade-up {
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity 0.6s ease, transform 0.6s ease;
+    }
+
+    .fade-up.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* ── Responsive ── */
+    @media (max-width: 640px) {
+      .hero h1 { font-size: 2rem; }
+      .hero { padding: 3.5rem 1.5rem 3rem; }
+      .container { padding: 0 1.25rem; }
+      .milestone-header h2 { font-size: 1.6rem; }
+      .slice { padding: 1.5rem; }
+      .stats { grid-template-columns: 1fr 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="grain"></div>
+<div class="vignette"></div>
+
+<!-- ════════════════════════ HERO ════════════════════════ -->
+<section class="hero">
+  <div class="hero-label">
+    <span>Project Roadmap</span>
+  </div>
+  <h1>Building the System Behind<br>Every Patient's Journey</h1>
+  <p>From the first Instagram comment to treatment completion — a structured, intelligent system that replaces spreadsheets and scattered messages with clarity.</p>
+</section>
+
+<!-- ════════════════════════ NARRATIVE INTRO ════════════════════════ -->
+<div class="container">
+  <section class="narrative fade-up">
+    <h2>Two Milestones. One Transformation.</h2>
+    <p>Today, every patient lives across WhatsApp threads, Google Drive folders, and memory. Tomorrow, they live in a system that knows where they are, what they need, and when to reach out — automatically. Here's how we get there.</p>
+  </section>
+
+  <!-- ════════════════════════ STATS ════════════════════════ -->
+  <section class="stats">
+    <div class="stat fade-up">
+      <div class="stat-value" data-count="2">2</div>
+      <div class="stat-label">Milestones</div>
+    </div>
+    <div class="stat fade-up">
+      <div class="stat-value" data-count="13">13</div>
+      <div class="stat-label">Slices</div>
+    </div>
+    <div class="stat fade-up">
+      <div class="stat-value">React + Supabase</div>
+      <div class="stat-label">Tech Stack</div>
+    </div>
+    <div class="stat fade-up">
+      <div class="stat-value" data-count="10">10+</div>
+      <div class="stat-label">Patient States</div>
+    </div>
+  </section>
+
+  <!-- ════════════════════════ MILESTONE 1 ════════════════════════ -->
+  <section class="milestone fade-up">
+    <div class="dot teal"></div>
+    <div class="milestone-header">
+      <div class="milestone-badge m1">
+        <i data-lucide="layers" style="width:14px;height:14px"></i>
+        Milestone 001
+      </div>
+      <h2>The Foundation — Core CRM</h2>
+      <p>Everything Hüseyin needs to stop managing patients from memory. A structured database, a visual pipeline, and the integrations that feed it — built from the ground up.</p>
+    </div>
+
+    <div class="slices">
+      <div class="slice teal fade-up">
+        <div class="slice-number">Slice 01 — Scaffolding</div>
+        <h3>Project Bootstrap & Supabase Schema</h3>
+        <p>Stand up the React + TypeScript application with Supabase. Design the core database schema: patients, statuses, packages, payments, notes, and documents. Configure Row Level Security policies and authentication. This is the skeleton everything else hangs on.</p>
+        <div class="slice-details">
+          <span class="tag"><i data-lucide="database"></i> Postgres Schema</span>
+          <span class="tag"><i data-lucide="shield"></i> RLS Policies</span>
+          <span class="tag"><i data-lucide="lock"></i> Auth Setup</span>
+          <span class="tag"><i data-lucide="folder-tree"></i> React Scaffold</span>
+        </div>
+      </div>
+
+      <div class="slice teal fade-up">
+        <div class="slice-number">Slice 02 — Patient Records</div>
+        <h3>Patient Profiles & Lifecycle States</h3>
+        <p>The heart of the CRM. Each patient gets a rich profile: personal details, package type, treatment timeline, blood test documents, protocol PDFs, and notes. The status engine tracks 10+ states — from Lead through Active Treatment to Completed or Cold — with timestamps and transition history.</p>
+        <div class="slice-details">
+          <span class="tag"><i data-lucide="user"></i> Patient CRUD</span>
+          <span class="tag"><i data-lucide="git-branch"></i> 10+ States</span>
+          <span class="tag"><i data-lucide="file-text"></i> Document Upload</span>
+          <span class="tag"><i data-lucide="clock"></i> Transition History</span>
+        </div>
+      </div>
+
+      <div class="slice teal fade-up">
+        <div class="slice-number">Slice 03 — Pipeline View</div>
+        <h3>Visual Pipeline & Lead Tracking</h3>
+        <p>A Kanban-style board where every patient is a card moving through stages. Drag to reclassify. Filter by package type, date range, or assigned status. At a glance, Hüseyin sees exactly where every patient stands — no scrolling through chat histories.</p>
+        <div class="slice-details">
+          <span class="tag"><i data-lucide="columns"></i> Kanban Board</span>
+          <span class="tag"><i data-lucide="filter"></i> Smart Filters</span>
+          <span class="tag"><i data-lucide="move"></i> Drag & Drop</span>
+        </div>
+      </div>
+
+      <div class="slice teal fade-up">
+        <div class="slice-number">Slice 04 — Payments</div>
+        <h3>Payment Tracking & Status</h3>
+        <p>Track every payment against every patient: PayPal transactions, international bank transfers, partial payments, and refunds. Package selection auto-populates expected amounts. Payment status updates sync to the patient's lifecycle — paid means active, overdue triggers a flag.</p>
+        <div class="slice-details">
+          <span class="tag"><i data-lucide="credit-card"></i> PayPal</span>
+          <span class="tag"><i data-lucide="building-2"></i> Bank Transfer</span>
+          <span class="tag"><i data-lucide="alert-circle"></i> Overdue Alerts</span>
+          <span class="tag"><i data-lucide="receipt"></i> Payment History</span>
+        </div>
+      </div>
+
+      <div class="slice teal fade-up">
+        <div class="slice-number">Slice 05 — Lead Capture</div>
+        <h3>ManyChat Webhook Integration</h3>
+        <p>When someone comments a keyword on an Instagram reel, ManyChat captures the lead. A webhook pushes that data straight into the CRM — name, Instagram handle, email, phone (with country code validation). No manual entry. No leads lost in DMs.</p>
+        <div class="slice-details">
+          <span class="tag"><i data-lucide="webhook"></i> Webhook Endpoint</span>
+          <span class="tag"><i data-lucide="instagram"></i> Instagram Data</span>
+          <span class="tag"><i data-lucide="phone"></i> Phone Validation</span>
+          <span class="tag"><i data-lucide="zap"></i> Auto-Create Lead</span>
+        </div>
+      </div>
+
+      <div class="slice teal fade-up">
+        <div class="slice-number">Slice 06 — Dashboard</div>
+        <h3>Analytics Dashboard</h3>
+        <p>The command center. Active client count, pipeline breakdown by stage, monthly revenue, conversion rate (lead → patient), and package distribution. Clean cards with the warm design system. Hüseyin opens this once a day and knows exactly where his business stands.</p>
+        <div class="slice-details">
+          <span class="tag"><i data-lucide="bar-chart-3"></i> Revenue Charts</span>
+          <span class="tag"><i data-lucide="pie-chart"></i> Pipeline Breakdown</span>
+          <span class="tag"><i data-lucide="trending-up"></i> Conversion Rate</span>
+          <span class="tag"><i data-lucide="activity"></i> Live Metrics</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ════════════════════════ DIVIDER ════════════════════════ -->
+  <div class="section-divider fade-up">
+    <span>Foundation Complete — Automation Begins</span>
+  </div>
+
+  <!-- ════════════════════════ MILESTONE 2 ════════════════════════ -->
+  <section class="milestone fade-up">
+    <div class="dot coral"></div>
+    <div class="milestone-header">
+      <div class="milestone-badge m2">
+        <i data-lucide="sparkles" style="width:14px;height:14px"></i>
+        Milestone 002
+      </div>
+      <h2>The Intelligence — Automation & Polish</h2>
+      <p>The CRM tracks. This milestone makes it <em>act</em>. Automated follow-ups, smart reminders at treatment milestones, scheduling that books itself, and the polish that turns a tool into a trusted system.</p>
+    </div>
+
+    <div class="slices">
+      <div class="slice coral fade-up">
+        <div class="slice-number">Slice 01 — Email Engine</div>
+        <h3>Automated Email Sequences</h3>
+        <p>When a lead enters the system, a welcome email fires immediately. Day 3: a follow-up. Day 7: another nudge. Day 12: if no response, mark cold. No manual tracking — the system moves leads forward or lets them go. SPF/DKIM configuration ensures nothing lands in spam.</p>
+        <div class="slice-details">
+          <span class="tag"><i data-lucide="mail"></i> Welcome Email</span>
+          <span class="tag"><i data-lucide="repeat"></i> Drip Sequence</span>
+          <span class="tag"><i data-lucide="shield-check"></i> SPF/DKIM</span>
+          <span class="tag"><i data-lucide="snowflake"></i> Auto-Cold Mark</span>
+        </div>
+      </div>
+
+      <div class="slice coral fade-up">
+        <div class="slice-number">Slice 02 — Smart Reminders</div>
+        <h3>Treatment Milestone Reminders</h3>
+        <p>The system knows the treatment timeline. Blood test not uploaded after 5 days? Reminder. Week 6 check-in approaching? Hüseyin gets a notification and the patient gets a message. End-of-programme review due? Scheduled automatically. VIP clients get monthly check-ins. Nothing falls through the cracks.</p>
+        <div class="slice-details">
+          <span class="tag"><i data-lucide="bell"></i> Blood Test Pending</span>
+          <span class="tag"><i data-lucide="calendar-check"></i> Week 6 Check-in</span>
+          <span class="tag"><i data-lucide="flag"></i> End Review</span>
+          <span class="tag"><i data-lucide="heart"></i> VIP Monthly</span>
+        </div>
+      </div>
+
+      <div class="slice coral fade-up">
+        <div class="slice-number">Slice 03 — Scheduling</div>
+        <h3>Consultation Calendar Integration</h3>
+        <p>Patients book consultations through available time slots synced with Hüseyin's calendar. Timezone-aware — critical for an international practice spanning Turkey, Thailand, and beyond. Confirmation emails, rescheduling, and no-show tracking built in.</p>
+        <div class="slice-details">
+          <span class="tag"><i data-lucide="calendar"></i> Calendar Sync</span>
+          <span class="tag"><i data-lucide="globe"></i> Timezone Aware</span>
+          <span class="tag"><i data-lucide="check-circle"></i> Confirmations</span>
+          <span class="tag"><i data-lucide="user-x"></i> No-Show Tracking</span>
+        </div>
+      </div>
+
+      <div class="slice coral fade-up">
+        <div class="slice-number">Slice 04 — Protocols</div>
+        <h3>PDF Protocol Delivery</h3>
+        <p>Treatment protocols — supplement plans, 90-day guides, blood test interpretations — stored in the system and delivered directly from the patient record. No more digging through Google Drive folders. One click: generate, attach, send.</p>
+        <div class="slice-details">
+          <span class="tag"><i data-lucide="file-down"></i> PDF Generation</span>
+          <span class="tag"><i data-lucide="send"></i> Direct Delivery</span>
+          <span class="tag"><i data-lucide="archive"></i> Document Vault</span>
+        </div>
+      </div>
+
+      <div class="slice coral fade-up">
+        <div class="slice-number">Slice 05 — Landing Page</div>
+        <h3>Landing Page Optimization</h3>
+        <p>The existing huseyinajuz.com on Netlify gets sharpened. Booking form improvements, phone country code validation (a recurring pain point), multi-language flag support for international clients, and tighter conversion tracking from landing page → lead in CRM.</p>
+        <div class="slice-details">
+          <span class="tag"><i data-lucide="globe-2"></i> Multi-Language</span>
+          <span class="tag"><i data-lucide="phone-call"></i> Country Codes</span>
+          <span class="tag"><i data-lucide="target"></i> Conversion Tracking</span>
+          <span class="tag"><i data-lucide="smartphone"></i> Mobile Optimized</span>
+        </div>
+      </div>
+
+      <div class="slice coral fade-up">
+        <div class="slice-number">Slice 06 — Deliverability</div>
+        <h3>Email Deliverability & Trust</h3>
+        <p>Emails going to spam kills the entire automation engine. This slice configures SPF, DKIM, and DMARC records for mrhus@huseyinacuz.com, sets up proper sending infrastructure, and verifies inbox placement. The foundation the email sequences depend on.</p>
+        <div class="slice-details">
+          <span class="tag"><i data-lucide="shield"></i> SPF Records</span>
+          <span class="tag"><i data-lucide="key"></i> DKIM Signing</span>
+          <span class="tag"><i data-lucide="check-check"></i> DMARC Policy</span>
+          <span class="tag"><i data-lucide="inbox"></i> Inbox Testing</span>
+        </div>
+      </div>
+
+      <div class="slice coral fade-up">
+        <div class="slice-number">Slice 07 — Multi-Language</div>
+        <h3>International Client Support</h3>
+        <p>Hüseyin's clients span continents. Language flags on patient records, locale-aware date and currency formatting, and template support for communications in multiple languages. The system respects that not every patient reads English.</p>
+        <div class="slice-details">
+          <span class="tag"><i data-lucide="languages"></i> Language Flags</span>
+          <span class="tag"><i data-lucide="calendar-days"></i> Locale Formatting</span>
+          <span class="tag"><i data-lucide="message-square"></i> Template i18n</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ════════════════════════ FOOTER ════════════════════════ -->
+  <section class="footer fade-up">
+    <p>Hüseyin Ajuz Patient Management System — Built with React, TypeScript & Supabase</p>
+    <p style="margin-top: 0.5rem; color: var(--text-muted); font-size: 0.75rem;">From Instagram comment to treatment completion — every step, tracked.</p>
+  </section>
+</div>
+
+<script>
+  // Initialize Lucide icons
+  lucide.createIcons();
+
+  // Scroll-triggered fade-up animations
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach((entry, i) => {
+      if (entry.isIntersecting) {
+        setTimeout(() => {
+          entry.target.classList.add('visible');
+        }, i * 80);
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+
+  document.querySelectorAll('.fade-up').forEach(el => observer.observe(el));
+
+  // Number counter animation
+  const countObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const el = entry.target;
+        const target = parseInt(el.dataset.count);
+        if (!target) return;
+        let current = 0;
+        const step = Math.max(1, Math.floor(target / 30));
+        const interval = setInterval(() => {
+          current += step;
+          if (current >= target) {
+            el.textContent = el.textContent.includes('+') ? target + '+' : target;
+            clearInterval(interval);
+          } else {
+            el.textContent = current;
+          }
+        }, 30);
+        countObserver.unobserve(el);
+      }
+    });
+  }, { threshold: 0.5 });
+
+  document.querySelectorAll('[data-count]').forEach(el => countObserver.observe(el));
+</script>
+
+</body>
+</html>
