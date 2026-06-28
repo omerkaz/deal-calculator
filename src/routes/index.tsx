@@ -6,6 +6,7 @@ import DashboardPage from "@/pages/DashboardPage";
 import PatientsPage from "@/pages/PatientsPage";
 import PatientFormPage from "@/pages/PatientFormPage";
 import PatientDetailPage from "@/pages/PatientDetailPage";
+import PipelinePage from "@/pages/PipelinePage";
 
 export const router = createBrowserRouter([
   {
@@ -38,8 +39,11 @@ export const router = createBrowserRouter([
             path: "/patients/:id/edit",
             element: <PatientFormPage />,
           },
+          {
+            path: "/pipeline",
+            element: <PipelinePage />,
+          },
           // Future routes:
-          // { path: "/pipeline", element: <PipelinePage /> },
           // { path: "/payments", element: <PaymentsPage /> },
         ],
       },
