@@ -1,15 +1,17 @@
 import { useCallback, useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router";
 import { ArrowLeft, Edit, Loader2, Trash2 } from "lucide-react";
-import { Button, Card } from "@/components/ui";
+import { Badge, Button, Card } from "@/components/ui";
 import { PatientStatusBadge } from "@/components/patients/PatientStatusBadge";
 import { StateTransitionButton } from "@/components/patients/StateTransitionButton";
 import { NotesList } from "@/components/patients/NotesList";
+import { PaymentsList } from "@/components/patients/PaymentsList";
 import { FileUpload } from "@/components/patients/FileUpload";
 import { deletePatient, getPatient } from "@/lib/patients";
+import { getPatientPaymentSummary } from "@/lib/payments";
 import { COUNTRY_CODES } from "@/lib/phone";
 import { LANGUAGES, PACKAGE_TYPES } from "@/types/database";
-import type { Patient } from "@/types/database";
+import type { PackageType, Patient, PaymentSummary } from "@/types/database";
 
 const dateFormatter = new Intl.DateTimeFormat("en-GB", {
   day: "numeric",
@@ -36,6 +38,7 @@ export default function PatientDetailPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [deleting, setDeleting] = useState(false);
+  const [paymentSummary, setPaymentSummary] = useState<PaymentSummary | null>(null);
 
   const fetchPatient = useCallback(async () => {
     if (!id) return;
@@ -63,6 +66,13 @@ export default function PatientDetailPage() {
   useEffect(() => {
     void fetchPatient();
   }, [fetchPatient]);
+
+  useEffect(() => {
+    if (!patient) return;
+    void getPatientPaymentSummary(patient.id, patient.package_type as PackageType | null).then(
+      ({ data }) => setPaymentSummary(data),
+    );
+  }, [patient]);
 
   async function handleDelete() {
     if (!id || !patient) return;
@@ -184,6 +194,32 @@ export default function PatientDetailPage() {
           <InfoItem label="Phone">{phoneDisplay}</InfoItem>
           <InfoItem label="Language">{languageDisplay}</InfoItem>
           <InfoItem label="Package">{packageDisplay}</InfoItem>
+          <InfoItem label="Payment Status">
+            {paymentSummary ? (
+              <span className="inline-flex items-center gap-2">
+                <Badge
+                  variant={
+                    paymentSummary.status === "paid"
+                      ? "teal"
+                      : paymentSummary.status === "partial"
+                        ? "coral"
+                        : "muted"
+                  }
+                >
+                  {paymentSummary.status === "paid"
+                    ? "Paid"
+                    : paymentSummary.status === "partial"
+                      ? "Partial"
+                      : "Unpaid"}
+                </Badge>
+                <span className="text-text-secondary">
+                  ${paymentSummary.totalPaid.toFixed(2)}
+                </span>
+              </span>
+            ) : (
+              "—"
+            )}
+          </InfoItem>
           <InfoItem label="Date of Birth">
             {patient.date_of_birth
               ? dateFormatter.format(new Date(patient.date_of_birth))
@@ -223,6 +259,17 @@ export default function PatientDetailPage() {
           Notes
         </h2>
         <NotesList patientId={patient.id} />
+      </Card>
+
+      {/* Payments */}
+      <Card hover={false}>
+        <h2 className="text-sm font-semibold text-text-secondary uppercase tracking-wider mb-4">
+          Payments
+        </h2>
+        <PaymentsList
+          patientId={patient.id}
+          packageType={patient.package_type as PackageType | null}
+        />
       </Card>
 
       {/* Files */}

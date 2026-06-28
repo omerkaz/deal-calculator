@@ -107,7 +107,7 @@ create policy "Users can delete own patient attachments"
   on patient_attachments for delete using (auth.uid() = created_by);
 
 -- ── Payments table ──
-create table if not exists payments (
+create table payments (
   id              uuid primary key default gen_random_uuid(),
   patient_id      uuid not null references patients(id) on delete cascade,
   amount          numeric(10,2) not null,
