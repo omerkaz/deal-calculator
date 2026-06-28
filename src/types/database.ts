@@ -109,3 +109,46 @@ export interface PatientAttachment {
 }
 
 export type PatientAttachmentInsert = Omit<PatientAttachment, "id" | "created_at">;
+
+// ── Payment Methods ──
+
+export const PAYMENT_METHODS = ["paypal", "bank_transfer"] as const;
+
+export type PaymentMethod = (typeof PAYMENT_METHODS)[number];
+
+export const PAYMENT_METHOD_LABELS: Record<PaymentMethod, string> = {
+  paypal: "PayPal",
+  bank_transfer: "Bank Transfer",
+};
+
+// ── Package Prices (USD) ──
+
+export const PACKAGE_PRICES: Record<PackageType, number> = {
+  standard: 197,
+  premium: 297,
+  vip: 497,
+};
+
+// ── Payment ──
+
+export type PaymentStatus = "paid" | "partial" | "unpaid";
+
+export interface PaymentSummary {
+  totalPaid: number;
+  status: PaymentStatus;
+  paymentCount: number;
+}
+
+export interface Payment {
+  id: string;
+  patient_id: string;
+  amount: number;
+  currency: string;
+  payment_method: PaymentMethod;
+  payment_date: string;
+  reference: string | null;
+  created_by: string;
+  created_at: string;
+}
+
+export type PaymentInsert = Omit<Payment, "id" | "created_at">;

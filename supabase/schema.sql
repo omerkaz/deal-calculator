@@ -106,6 +106,33 @@ create policy "Users can insert own patient attachments"
 create policy "Users can delete own patient attachments"
   on patient_attachments for delete using (auth.uid() = created_by);
 
+-- ── Payments table ──
+create table if not exists payments (
+  id              uuid primary key default gen_random_uuid(),
+  patient_id      uuid not null references patients(id) on delete cascade,
+  amount          numeric(10,2) not null,
+  currency        text not null default 'USD',
+  payment_method  text not null check (payment_method in ('paypal', 'bank_transfer')),
+  payment_date    date not null,
+  reference       text,
+  created_by      uuid not null references auth.users(id),
+  created_at      timestamptz not null default now()
+);
+
+create index if not exists idx_payments_patient on payments(patient_id);
+
+-- ── Payments RLS ──
+alter table payments enable row level security;
+
+create policy "Users can view own payments"
+  on payments for select using (auth.uid() = created_by);
+
+create policy "Users can insert own payments"
+  on payments for insert with check (auth.uid() = created_by);
+
+create policy "Users can delete own payments"
+  on payments for delete using (auth.uid() = created_by);
+
 -- ── Storage bucket ──
 -- NOTE: Create a 'patient-attachments' bucket in Supabase Dashboard > Storage
 -- with RLS policy: auth.uid() = owner
