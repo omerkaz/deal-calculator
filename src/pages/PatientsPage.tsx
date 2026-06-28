@@ -1,11 +1,64 @@
 import { useCallback, useEffect, useState } from "react";
 import { Link } from "react-router";
-import { Button, Card } from "@/components/ui";
+import { Badge, Button, Card } from "@/components/ui";
 import { PatientStatusBadge } from "@/components/patients/PatientStatusBadge";
 import { PatientFilters } from "@/components/patients/PatientFilters";
 import { getPatients } from "@/lib/patients";
-import type { LifecycleState, PackageType, Patient } from "@/types/database";
+import { getPayments } from "@/lib/payments";
+import type { LifecycleState, PackageType, Patient, Payment, PaymentStatus } from "@/types/database";
+import { PACKAGE_PRICES } from "@/types/database";
 import { Loader2, Plus, Users } from "lucide-react";
+
+const paymentStatusVariant: Record<PaymentStatus, "teal" | "coral" | "muted"> = {
+  paid: "teal",
+  partial: "coral",
+  unpaid: "muted",
+};
+
+const paymentStatusLabel: Record<PaymentStatus, string> = {
+  paid: "Paid",
+  partial: "Partial",
+  unpaid: "Unpaid",
+};
+
+function computePaymentStatusMap(
+  payments: Payment[],
+  patients: Patient[],
+): Map<string, PaymentStatus> {
+  // Group payments by patient_id
+  const byPatient = new Map<string, number>();
+  for (const p of payments) {
+    byPatient.set(p.patient_id, (byPatient.get(p.patient_id) ?? 0) + Number(p.amount));
+  }
+
+  // Build patient id -> package_type lookup
+  const packageMap = new Map<string, PackageType | null>();
+  for (const pt of patients) {
+    packageMap.set(pt.id, pt.package_type);
+  }
+
+  // Compute status per patient
+  const statusMap = new Map<string, PaymentStatus>();
+  for (const pt of patients) {
+    const totalPaid = byPatient.get(pt.id) ?? 0;
+    const pkgType = packageMap.get(pt.id) ?? null;
+
+    if (pkgType === null) {
+      statusMap.set(pt.id, totalPaid > 0 ? "paid" : "unpaid");
+    } else {
+      const price = PACKAGE_PRICES[pkgType];
+      if (totalPaid >= price) {
+        statusMap.set(pt.id, "paid");
+      } else if (totalPaid > 0) {
+        statusMap.set(pt.id, "partial");
+      } else {
+        statusMap.set(pt.id, "unpaid");
+      }
+    }
+  }
+
+  return statusMap;
+}
 
 const packageLabels: Record<PackageType, string> = {
   standard: "Standard",
@@ -15,6 +68,7 @@ const packageLabels: Record<PackageType, string> = {
 
 export default function PatientsPage() {
   const [patients, setPatients] = useState<Patient[]>([]);
+  const [paymentStatusMap, setPaymentStatusMap] = useState<Map<string, PaymentStatus>>(new Map());
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -37,13 +91,23 @@ export default function PatientsPage() {
     if (status) filters.status = status;
     if (packageType) filters.packageType = packageType;
 
-    const result = await getPatients(filters);
+    const [result, paymentsResult] = await Promise.all([
+      getPatients(filters),
+      getPayments(),
+    ]);
 
     if (result.error) {
       setError(result.error.message);
       setPatients([]);
-    } else {
-      setPatients(result.data);
+      setLoading(false);
+      return;
+    }
+
+    setPatients(result.data);
+
+    // Compute payment status map — non-blocking; if payments fail, just skip badges
+    if (!paymentsResult.error) {
+      setPaymentStatusMap(computePaymentStatusMap(paymentsResult.data, result.data));
     }
 
     setLoading(false);
@@ -150,6 +214,13 @@ export default function PatientsPage() {
 
                 {/* Status badge */}
                 <PatientStatusBadge status={patient.lifecycle_state} />
+
+                {/* Payment status badge */}
+                {paymentStatusMap.has(patient.id) && (
+                  <Badge variant={paymentStatusVariant[paymentStatusMap.get(patient.id)!]}>
+                    {paymentStatusLabel[paymentStatusMap.get(patient.id)!]}
+                  </Badge>
+                )}
 
                 {/* Package */}
                 {patient.package_type && (
