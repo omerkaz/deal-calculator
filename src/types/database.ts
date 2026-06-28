@@ -75,12 +75,17 @@ export interface Patient {
   lifecycle_state: LifecycleState;
   package_type: PackageType | null;
   notes_text: string | null;
+  manychat_id: string | null;
+  instagram_username: string | null;
   created_by: string;
   created_at: string;
   updated_at: string;
 }
 
-export type PatientInsert = Omit<Patient, "id" | "created_at" | "updated_at">;
+export type PatientInsert = Omit<Patient, "id" | "created_at" | "updated_at" | "manychat_id" | "instagram_username"> & {
+  manychat_id?: string | null;
+  instagram_username?: string | null;
+};
 export type PatientUpdate = Partial<Omit<Patient, "id" | "created_at" | "updated_at" | "created_by">>;
 
 // ── Patient Note ──

@@ -31,6 +31,8 @@ create table if not exists patients (
     )),
   package_type  text check (package_type in ('standard', 'premium', 'vip')),
   notes_text    text,
+  manychat_id   text unique,
+  instagram_username text,
   created_by    uuid not null references auth.users(id),
   created_at    timestamptz not null default now(),
   updated_at    timestamptz not null default now()
