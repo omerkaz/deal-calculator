@@ -48,3 +48,7 @@ vendor/
 venv/
 yarn-debug.log*
 yarn-error.log*
+
+# ── GSD baseline (auto-generated) ──
+.mcp.json
+.bg-shell/
