@@ -80,11 +80,13 @@ export interface Patient {
   created_by: string;
   created_at: string;
   updated_at: string;
+  state_changed_at: string | null;
 }
 
-export type PatientInsert = Omit<Patient, "id" | "created_at" | "updated_at" | "manychat_id" | "instagram_username"> & {
+export type PatientInsert = Omit<Patient, "id" | "created_at" | "updated_at" | "manychat_id" | "instagram_username" | "state_changed_at"> & {
   manychat_id?: string | null;
   instagram_username?: string | null;
+  state_changed_at?: string | null;
 };
 export type PatientUpdate = Partial<Omit<Patient, "id" | "created_at" | "updated_at" | "created_by">>;
 

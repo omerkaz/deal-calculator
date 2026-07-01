@@ -135,6 +135,7 @@ export async function transitionState(
     .update({
       lifecycle_state: newState,
       updated_at: new Date().toISOString(),
+      state_changed_at: new Date().toISOString(),
     })
     .eq("id", id)
     .eq("lifecycle_state", currentState) // optimistic concurrency — only update if state hasn't changed

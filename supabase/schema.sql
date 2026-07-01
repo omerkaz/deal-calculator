@@ -170,3 +170,8 @@ create policy "Users can insert own settings"
 
 create policy "Users can update own settings"
   on practitioner_settings for update using (auth.uid() = user_id);
+
+-- ── state_changed_at migration ──
+ALTER TABLE patients ADD COLUMN IF NOT EXISTS state_changed_at TIMESTAMPTZ;
+UPDATE patients SET state_changed_at = updated_at WHERE state_changed_at IS NULL;
+CREATE INDEX IF NOT EXISTS idx_patients_state_changed ON patients(lifecycle_state, state_changed_at);
