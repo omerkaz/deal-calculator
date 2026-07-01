@@ -100,13 +100,13 @@ create policy "Users can delete own patient notes"
 
 -- Patient attachments: users can CRUD attachments on their own patients
 create policy "Users can view own patient attachments"
-  on patient_attachments for select using (auth.uid() = created_by);
+  on patient_attachments for select using (auth.uid() = uploaded_by);
 
 create policy "Users can insert own patient attachments"
-  on patient_attachments for insert with check (auth.uid() = created_by);
+  on patient_attachments for insert with check (auth.uid() = uploaded_by);
 
 create policy "Users can delete own patient attachments"
-  on patient_attachments for delete using (auth.uid() = created_by);
+  on patient_attachments for delete using (auth.uid() = uploaded_by);
 
 -- ── Payments table ──
 create table payments (
