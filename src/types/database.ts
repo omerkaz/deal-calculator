@@ -157,3 +157,36 @@ export interface Payment {
 }
 
 export type PaymentInsert = Omit<Payment, "id" | "created_at">;
+
+// ── Practitioner Settings ──
+
+export interface PractitionerSettings {
+  id: string;
+  user_id: string;
+  welcome_email_enabled: boolean;
+  blood_test_reminder_enabled: boolean;
+  week_6_checkin_enabled: boolean;
+  end_review_enabled: boolean;
+  lead_day3_enabled: boolean;
+  lead_day7_enabled: boolean;
+  lead_day12_enabled: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export type PractitionerSettingsUpdate = Partial<
+  Omit<PractitionerSettings, "id" | "user_id" | "created_at" | "updated_at">
+>;
+
+export const DEFAULT_SETTINGS: Omit<
+  PractitionerSettings,
+  "id" | "user_id" | "created_at" | "updated_at"
+> = {
+  welcome_email_enabled: false,
+  blood_test_reminder_enabled: false,
+  week_6_checkin_enabled: false,
+  end_review_enabled: false,
+  lead_day3_enabled: false,
+  lead_day7_enabled: false,
+  lead_day12_enabled: false,
+} as const;

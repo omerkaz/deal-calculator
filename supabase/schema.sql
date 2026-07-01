@@ -140,3 +140,33 @@ create policy "Users can delete own payments"
 -- with RLS policy: auth.uid() = owner
 -- Max file size: 10MB
 -- Allowed MIME types: image/*, application/pdf
+
+-- ── Practitioner settings table ──
+create table if not exists practitioner_settings (
+  id                          uuid primary key default gen_random_uuid(),
+  user_id                     uuid not null unique references auth.users(id),
+  welcome_email_enabled       boolean not null default false,
+  blood_test_reminder_enabled boolean not null default false,
+  week_6_checkin_enabled      boolean not null default false,
+  end_review_enabled          boolean not null default false,
+  lead_day3_enabled           boolean not null default false,
+  lead_day7_enabled           boolean not null default false,
+  lead_day12_enabled          boolean not null default false,
+  created_at                  timestamptz not null default now(),
+  updated_at                  timestamptz not null default now()
+);
+
+create trigger practitioner_settings_updated_at
+  before update on practitioner_settings
+  for each row execute function update_updated_at();
+
+alter table practitioner_settings enable row level security;
+
+create policy "Users can view own settings"
+  on practitioner_settings for select using (auth.uid() = user_id);
+
+create policy "Users can insert own settings"
+  on practitioner_settings for insert with check (auth.uid() = user_id);
+
+create policy "Users can update own settings"
+  on practitioner_settings for update using (auth.uid() = user_id);
