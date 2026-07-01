@@ -8,6 +8,7 @@ import PatientFormPage from "@/pages/PatientFormPage";
 import PatientDetailPage from "@/pages/PatientDetailPage";
 import PaymentsPage from "@/pages/PaymentsPage";
 import PipelinePage from "@/pages/PipelinePage";
+import SettingsPage from "@/pages/SettingsPage";
 
 export const router = createBrowserRouter([
   {
@@ -47,6 +48,10 @@ export const router = createBrowserRouter([
           {
             path: "/payments",
             element: <PaymentsPage />,
+          },
+          {
+            path: "/settings",
+            element: <SettingsPage />,
           },
         ],
       },

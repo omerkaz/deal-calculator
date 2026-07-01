@@ -4,6 +4,7 @@ import {
   Users,
   Kanban,
   CreditCard,
+  Settings,
   Menu,
   X,
 } from "lucide-react";
@@ -14,6 +15,7 @@ const navItems = [
   { to: "/patients", label: "Patients", icon: Users },
   { to: "/pipeline", label: "Pipeline", icon: Kanban },
   { to: "/payments", label: "Payments", icon: CreditCard },
+  { to: "/settings", label: "Settings", icon: Settings },
 ] as const;
 
 export default function Sidebar() {

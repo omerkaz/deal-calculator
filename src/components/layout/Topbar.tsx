@@ -8,6 +8,7 @@ const PAGE_TITLES: Record<string, string> = {
   "/patients": "Patients",
   "/pipeline": "Pipeline",
   "/payments": "Payments",
+  "/settings": "Settings",
 };
 
 function usePageTitle(): string {
