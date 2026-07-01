@@ -175,3 +175,182 @@ create policy "Users can update own settings"
 ALTER TABLE patients ADD COLUMN IF NOT EXISTS state_changed_at TIMESTAMPTZ;
 UPDATE patients SET state_changed_at = updated_at WHERE state_changed_at IS NULL;
 CREATE INDEX IF NOT EXISTS idx_patients_state_changed ON patients(lifecycle_state, state_changed_at);
+
+-- ── M002 S04: Lifecycle reminder pg_cron jobs ──
+--
+-- PRE-RUN CHECKLIST (Supabase SQL Editor):
+--   1. SET app.supabase_functions_url = 'https://hbhepcucokwlagqygwrz.supabase.co/functions/v1';
+--      Run this SET before applying the functions below, or the GUC will be NULL and http_post
+--      calls will fire to a NULL URL (pg_net silently drops them).
+--   2. Ensure WEBHOOK_SECRET is stored in Vault:
+--      Supabase Dashboard > Vault > New Secret, name = 'WEBHOOK_SECRET', value = <your secret>
+--      The functions read it via vault.decrypted_secrets — never hardcode it in SQL.
+--   3. pg_cron and pg_net extensions must be enabled for the project
+--      (Supabase Dashboard > Database > Extensions). The guards below are idempotent.
+
+CREATE EXTENSION IF NOT EXISTS pg_cron;
+CREATE EXTENSION IF NOT EXISTS pg_net;
+
+-- Helper: send blood-test reminder emails
+-- Fires for patients in 'awaiting_blood_test' whose state_changed_at is > 14 days ago.
+CREATE OR REPLACE FUNCTION send_blood_test_reminders()
+RETURNS void
+LANGUAGE plpgsql
+SECURITY DEFINER
+AS $$
+DECLARE
+  _secret  text;
+  _url     text;
+  _patient RECORD;
+  _body    jsonb;
+BEGIN
+  SELECT decrypted_secret INTO _secret
+    FROM vault.decrypted_secrets
+   WHERE name = 'WEBHOOK_SECRET'
+   LIMIT 1;
+
+  _url := current_setting('app.supabase_functions_url', true) || '/send-email';
+
+  FOR _patient IN
+    SELECT id, first_name, email
+      FROM patients
+     WHERE lifecycle_state = 'awaiting_blood_test'
+       AND state_changed_at < now() - INTERVAL '14 days'
+       AND email IS NOT NULL
+  LOOP
+    _body := jsonb_build_object(
+      'feature',      'blood_test_reminder',
+      'patient_id',   _patient.id,
+      'patient_name', _patient.first_name,
+      'patient_email', _patient.email
+    );
+
+    PERFORM pg_net.http_post(
+      url     := _url,
+      body    := _body,
+      headers := jsonb_build_object(
+        'Content-Type',  'application/json',
+        'Authorization', 'Bearer ' || _secret
+      )
+    );
+  END LOOP;
+END;
+$$;
+
+-- Helper: send week-6 check-in reminder emails
+-- Fires for patients in 'active_treatment' whose state_changed_at is > 42 days ago.
+CREATE OR REPLACE FUNCTION send_week6_checkin_reminders()
+RETURNS void
+LANGUAGE plpgsql
+SECURITY DEFINER
+AS $$
+DECLARE
+  _secret  text;
+  _url     text;
+  _patient RECORD;
+  _body    jsonb;
+BEGIN
+  SELECT decrypted_secret INTO _secret
+    FROM vault.decrypted_secrets
+   WHERE name = 'WEBHOOK_SECRET'
+   LIMIT 1;
+
+  _url := current_setting('app.supabase_functions_url', true) || '/send-email';
+
+  FOR _patient IN
+    SELECT id, first_name, email
+      FROM patients
+     WHERE lifecycle_state = 'active_treatment'
+       AND state_changed_at < now() - INTERVAL '42 days'
+       AND email IS NOT NULL
+  LOOP
+    _body := jsonb_build_object(
+      'feature',       'week_6_checkin',
+      'patient_id',    _patient.id,
+      'patient_name',  _patient.first_name,
+      'patient_email', _patient.email
+    );
+
+    PERFORM pg_net.http_post(
+      url     := _url,
+      body    := _body,
+      headers := jsonb_build_object(
+        'Content-Type',  'application/json',
+        'Authorization', 'Bearer ' || _secret
+      )
+    );
+  END LOOP;
+END;
+$$;
+
+-- Helper: send end-review reminder emails
+-- Fires for patients in 'week_6_checkin' whose state_changed_at is > 7 days ago.
+CREATE OR REPLACE FUNCTION send_end_review_reminders()
+RETURNS void
+LANGUAGE plpgsql
+SECURITY DEFINER
+AS $$
+DECLARE
+  _secret  text;
+  _url     text;
+  _patient RECORD;
+  _body    jsonb;
+BEGIN
+  SELECT decrypted_secret INTO _secret
+    FROM vault.decrypted_secrets
+   WHERE name = 'WEBHOOK_SECRET'
+   LIMIT 1;
+
+  _url := current_setting('app.supabase_functions_url', true) || '/send-email';
+
+  FOR _patient IN
+    SELECT id, first_name, email
+      FROM patients
+     WHERE lifecycle_state = 'week_6_checkin'
+       AND state_changed_at < now() - INTERVAL '7 days'
+       AND email IS NOT NULL
+  LOOP
+    _body := jsonb_build_object(
+      'feature',       'end_review',
+      'patient_id',    _patient.id,
+      'patient_name',  _patient.first_name,
+      'patient_email', _patient.email
+    );
+
+    PERFORM pg_net.http_post(
+      url     := _url,
+      body    := _body,
+      headers := jsonb_build_object(
+        'Content-Type',  'application/json',
+        'Authorization', 'Bearer ' || _secret
+      )
+    );
+  END LOOP;
+END;
+$$;
+
+-- Register the three daily cron jobs (idempotent: unschedule first if they exist)
+DO $$
+BEGIN
+  -- blood-test-reminders
+  PERFORM cron.unschedule('blood-test-reminders');
+  EXCEPTION WHEN others THEN NULL;
+END;
+$$;
+SELECT cron.schedule('blood-test-reminders', '0 8 * * *', 'SELECT send_blood_test_reminders();');
+
+DO $$
+BEGIN
+  PERFORM cron.unschedule('week6-checkin-reminders');
+  EXCEPTION WHEN others THEN NULL;
+END;
+$$;
+SELECT cron.schedule('week6-checkin-reminders', '0 8 * * *', 'SELECT send_week6_checkin_reminders();');
+
+DO $$
+BEGIN
+  PERFORM cron.unschedule('end-review-reminders');
+  EXCEPTION WHEN others THEN NULL;
+END;
+$$;
+SELECT cron.schedule('end-review-reminders', '0 8 * * *', 'SELECT send_end_review_reminders();');
