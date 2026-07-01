@@ -4,6 +4,7 @@ import { ArrowLeft, Loader2, Save } from "lucide-react";
 import { Button, Card, Input, Select } from "@/components/ui";
 import { useAuth } from "@/context/auth";
 import { createPatient, getPatient, updatePatient } from "@/lib/patients";
+import { sendWelcomeEmail } from "@/lib/email";
 import { COUNTRY_CODES, isValidPhone } from "@/lib/phone";
 import { LANGUAGES, PACKAGE_TYPES } from "@/types/database";
 import type { LanguageCode, PackageType } from "@/types/database";
@@ -138,6 +139,11 @@ export default function PatientFormPage() {
         setErrors({ submit: error?.message ?? "Failed to create patient." });
         setSubmitting(false);
         return;
+      }
+      if (payload.email) {
+        sendWelcomeEmail({ to: payload.email, firstName: payload.first_name }).catch(
+          (err: unknown) => console.error("[email] sendWelcomeEmail error:", err),
+        );
       }
       void navigate(`/patients/${data.id}`);
     }

@@ -91,16 +91,31 @@ Deno.serve(async (req: Request) => {
   }
 
   // ── Auth validation ──
-  // Accept secret via Authorization: Bearer <secret> header or ?secret=<value> query param
+  // Accept either:
+  //   1. Shared WEBHOOK_SECRET via Authorization: Bearer <secret> or ?secret=<value> (pg_cron / server callers)
+  //   2. A valid Supabase session JWT via Authorization: Bearer <jwt> (browser / PatientFormPage callers)
   const authHeader = req.headers.get("authorization");
   const bearerToken = extractBearerToken(authHeader);
   const url = new URL(req.url);
   const querySecret = url.searchParams.get("secret");
-  const providedSecret = bearerToken || querySecret;
+  const providedToken = bearerToken || querySecret;
 
-  if (!providedSecret || providedSecret !== webhookSecret) {
-    console.warn("[send-email] Auth failed: invalid or missing secret");
+  if (!providedToken) {
+    console.warn("[send-email] Auth failed: missing token");
     return jsonResponse({ error: "Unauthorized" }, 401);
+  }
+
+  if (providedToken !== webhookSecret) {
+    // Not the shared secret — try validating as a Supabase session JWT
+    const supabaseAdmin = createClient(supabaseUrl, serviceRoleKey, {
+      auth: { autoRefreshToken: false, persistSession: false },
+    });
+    const { data: userData, error: userError } = await supabaseAdmin.auth.getUser(providedToken);
+    if (userError || !userData?.user) {
+      console.warn("[send-email] Auth failed: invalid JWT");
+      return jsonResponse({ error: "Unauthorized" }, 401);
+    }
+    // JWT is valid — authenticated as a session user
   }
 
   // ── Parse body ──

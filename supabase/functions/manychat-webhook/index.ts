@@ -169,7 +169,7 @@ Deno.serve(async (req: Request) => {
     // secondary check: query the patient's created_at vs updated_at.
     const { data: patient } = await supabase
       .from("patients")
-      .select("created_at, updated_at")
+      .select("created_at, updated_at, email, first_name, last_name")
       .eq("id", data.id)
       .single();
 
@@ -178,6 +178,35 @@ Deno.serve(async (req: Request) => {
     const httpStatus = isNew ? 201 : 200;
 
     console.log(`[manychat-webhook] Patient ${status}: id=${data.id}, manychat_id=${data.manychat_id}`);
+
+    // Send welcome email for new patients who have an email address
+    if (isNew && patient && patient.email) {
+      try {
+        const welcomeRes = await fetch(`${supabaseUrl}/functions/v1/send-email`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${webhookSecret}`,
+          },
+          body: JSON.stringify({
+            feature: "welcome_email",
+            to: patient.email,
+            subject: "Welcome — Hüseyin Ajuz Hair Loss Consultation",
+            html: `<p>Dear ${patient.first_name},</p><p>Thank you for registering with Hüseyin Ajuz. We will be in touch shortly to guide you through your personalised hair loss treatment journey.</p><p>Warm regards,<br>Hüseyin Ajuz</p>`,
+            text: `Dear ${patient.first_name}, Thank you for registering with Hüseyin Ajuz. We will be in touch shortly. Warm regards, Hüseyin Ajuz`,
+          }),
+        });
+        if (!welcomeRes.ok) {
+          const errText = await welcomeRes.text();
+          console.error(`[manychat-webhook] send-email failed: status=${welcomeRes.status} body=${errText}`);
+        } else {
+          console.log(`[manychat-webhook] Welcome email dispatched for patient id=${data.id}`);
+        }
+      } catch (emailErr: unknown) {
+        const emailMsg = emailErr instanceof Error ? emailErr.message : "Unknown error";
+        console.error(`[manychat-webhook] send-email failed: ${emailMsg}`);
+      }
+    }
 
     return jsonResponse(
       { status, patient_id: data.id, manychat_id: data.manychat_id },
