@@ -354,3 +354,228 @@ BEGIN
 END;
 $$;
 SELECT cron.schedule('end-review-reminders', '0 8 * * *', 'SELECT send_end_review_reminders();');
+
+-- ── M002 S05: Lead follow-up pg_cron jobs ──
+
+-- Helper: send Day-3 follow-up email to leads
+-- Fires for leads whose COALESCE(state_changed_at, created_at) is 3 days ago (±1 day window).
+CREATE OR REPLACE FUNCTION notify_lead_day3()
+RETURNS void
+LANGUAGE plpgsql
+SECURITY DEFINER
+AS $$
+DECLARE
+  _secret  text;
+  _url     text;
+  _patient RECORD;
+  _body    jsonb;
+  _enabled boolean;
+BEGIN
+  SELECT (lead_day3_enabled IS TRUE) INTO _enabled
+    FROM practitioner_settings
+   LIMIT 1;
+
+  IF NOT COALESCE(_enabled, false) THEN
+    RAISE NOTICE '[notify_lead_day3] feature=lead_day3 enabled=false skipped';
+    RETURN;
+  END IF;
+
+  SELECT decrypted_secret INTO _secret
+    FROM vault.decrypted_secrets
+   WHERE name = 'WEBHOOK_SECRET'
+   LIMIT 1;
+
+  _url := current_setting('app.supabase_functions_url', true) || '/send-email';
+
+  FOR _patient IN
+    SELECT id, first_name, email
+      FROM patients
+     WHERE lifecycle_state = 'lead'
+       AND COALESCE(state_changed_at, created_at) BETWEEN now() - INTERVAL '4 days' AND now() - INTERVAL '3 days'
+       AND email IS NOT NULL
+  LOOP
+    _body := jsonb_build_object(
+      'feature', 'lead_day3',
+      'to',      _patient.email,
+      'subject', 'Following up on your hair loss consultation',
+      'html',    '<p>Hi ' || _patient.first_name || ',</p><p>I wanted to follow up on your interest in our hair loss consultation programme. I''d love to help you understand what''s causing your hair loss and put together a personalised plan for you.</p><p>Feel free to reply to this email or reach out via WhatsApp to book a slot.</p><p>Best,<br>Hüseyin Ajuz</p>'
+    );
+
+    PERFORM pg_net.http_post(
+      url     := _url,
+      body    := _body,
+      headers := jsonb_build_object(
+        'Content-Type',  'application/json',
+        'Authorization', 'Bearer ' || _secret
+      )
+    );
+  END LOOP;
+END;
+$$;
+
+-- Helper: send Day-7 follow-up email to leads
+-- Fires for leads whose COALESCE(state_changed_at, created_at) is 7 days ago (±1 day window).
+CREATE OR REPLACE FUNCTION notify_lead_day7()
+RETURNS void
+LANGUAGE plpgsql
+SECURITY DEFINER
+AS $$
+DECLARE
+  _secret  text;
+  _url     text;
+  _patient RECORD;
+  _body    jsonb;
+  _enabled boolean;
+BEGIN
+  SELECT (lead_day7_enabled IS TRUE) INTO _enabled
+    FROM practitioner_settings
+   LIMIT 1;
+
+  IF NOT COALESCE(_enabled, false) THEN
+    RAISE NOTICE '[notify_lead_day7] feature=lead_day7 enabled=false skipped';
+    RETURN;
+  END IF;
+
+  SELECT decrypted_secret INTO _secret
+    FROM vault.decrypted_secrets
+   WHERE name = 'WEBHOOK_SECRET'
+   LIMIT 1;
+
+  _url := current_setting('app.supabase_functions_url', true) || '/send-email';
+
+  FOR _patient IN
+    SELECT id, first_name, email
+      FROM patients
+     WHERE lifecycle_state = 'lead'
+       AND COALESCE(state_changed_at, created_at) BETWEEN now() - INTERVAL '8 days' AND now() - INTERVAL '7 days'
+       AND email IS NOT NULL
+  LOOP
+    _body := jsonb_build_object(
+      'feature', 'lead_day7',
+      'to',      _patient.email,
+      'subject', 'Still thinking about your hair loss? Here''s what we can do',
+      'html',    '<p>Hi ' || _patient.first_name || ',</p><p>A week has passed since you first reached out. Hair loss can be tricky to address without the right guidance — that''s exactly what we specialise in.</p><p>If you have any questions before booking, just hit reply. I''m happy to chat.</p><p>Best,<br>Hüseyin Ajuz</p>'
+    );
+
+    PERFORM pg_net.http_post(
+      url     := _url,
+      body    := _body,
+      headers := jsonb_build_object(
+        'Content-Type',  'application/json',
+        'Authorization', 'Bearer ' || _secret
+      )
+    );
+  END LOOP;
+END;
+$$;
+
+-- Helper: send Day-12 follow-up email to leads
+-- Fires for leads whose COALESCE(state_changed_at, created_at) is 12 days ago (±1 day window).
+CREATE OR REPLACE FUNCTION notify_lead_day12()
+RETURNS void
+LANGUAGE plpgsql
+SECURITY DEFINER
+AS $$
+DECLARE
+  _secret  text;
+  _url     text;
+  _patient RECORD;
+  _body    jsonb;
+  _enabled boolean;
+BEGIN
+  SELECT (lead_day12_enabled IS TRUE) INTO _enabled
+    FROM practitioner_settings
+   LIMIT 1;
+
+  IF NOT COALESCE(_enabled, false) THEN
+    RAISE NOTICE '[notify_lead_day12] feature=lead_day12 enabled=false skipped';
+    RETURN;
+  END IF;
+
+  SELECT decrypted_secret INTO _secret
+    FROM vault.decrypted_secrets
+   WHERE name = 'WEBHOOK_SECRET'
+   LIMIT 1;
+
+  _url := current_setting('app.supabase_functions_url', true) || '/send-email';
+
+  FOR _patient IN
+    SELECT id, first_name, email
+      FROM patients
+     WHERE lifecycle_state = 'lead'
+       AND COALESCE(state_changed_at, created_at) BETWEEN now() - INTERVAL '13 days' AND now() - INTERVAL '12 days'
+       AND email IS NOT NULL
+  LOOP
+    _body := jsonb_build_object(
+      'feature', 'lead_day12',
+      'to',      _patient.email,
+      'subject', 'Last chance to book your consultation',
+      'html',    '<p>Hi ' || _patient.first_name || ',</p><p>This is my final follow-up. I don''t want to overwhelm your inbox — but I did want to make sure you hadn''t missed us.</p><p>If you''re still interested in understanding and tackling your hair loss, I''d love to help. Just reply and we''ll take it from there.</p><p>Best,<br>Hüseyin Ajuz</p>'
+    );
+
+    PERFORM pg_net.http_post(
+      url     := _url,
+      body    := _body,
+      headers := jsonb_build_object(
+        'Content-Type',  'application/json',
+        'Authorization', 'Bearer ' || _secret
+      )
+    );
+  END LOOP;
+END;
+$$;
+
+-- Helper: auto-transition stale leads to cold state
+-- Fires for all leads whose COALESCE(state_changed_at, created_at) is older than 12 days.
+-- No toggle check — auto-cold is an unconditional safety net, not an optional email.
+CREATE OR REPLACE FUNCTION auto_cold_leads()
+RETURNS void
+LANGUAGE plpgsql
+SECURITY DEFINER
+AS $$
+DECLARE
+  _count integer;
+BEGIN
+  UPDATE patients
+     SET lifecycle_state  = 'cold',
+         state_changed_at = now()
+   WHERE lifecycle_state = 'lead'
+     AND COALESCE(state_changed_at, created_at) < now() - INTERVAL '12 days';
+
+  GET DIAGNOSTICS _count = ROW_COUNT;
+  RAISE NOTICE '[auto_cold_leads] transitioned % leads to cold', _count;
+END;
+$$;
+
+-- Register the four S05 cron jobs (idempotent: unschedule first if they exist)
+DO $$
+BEGIN
+  PERFORM cron.unschedule('lead-followup-day3');
+  EXCEPTION WHEN others THEN NULL;
+END;
+$$;
+SELECT cron.schedule('lead-followup-day3', '0 9 * * *', 'SELECT notify_lead_day3();');
+
+DO $$
+BEGIN
+  PERFORM cron.unschedule('lead-followup-day7');
+  EXCEPTION WHEN others THEN NULL;
+END;
+$$;
+SELECT cron.schedule('lead-followup-day7', '0 9 * * *', 'SELECT notify_lead_day7();');
+
+DO $$
+BEGIN
+  PERFORM cron.unschedule('lead-followup-day12');
+  EXCEPTION WHEN others THEN NULL;
+END;
+$$;
+SELECT cron.schedule('lead-followup-day12', '0 9 * * *', 'SELECT notify_lead_day12();');
+
+DO $$
+BEGIN
+  PERFORM cron.unschedule('auto-cold-leads');
+  EXCEPTION WHEN others THEN NULL;
+END;
+$$;
+SELECT cron.schedule('auto-cold-leads', '0 9 * * *', 'SELECT auto_cold_leads();');
