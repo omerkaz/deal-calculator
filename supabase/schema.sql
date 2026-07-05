@@ -179,20 +179,28 @@ CREATE INDEX IF NOT EXISTS idx_patients_state_changed ON patients(lifecycle_stat
 -- ── M002 S04: Lifecycle reminder pg_cron jobs ──
 --
 -- PRE-RUN CHECKLIST (Supabase SQL Editor):
---   1. SET app.supabase_functions_url = 'https://hbhepcucokwlagqygwrz.supabase.co/functions/v1';
---      Run this SET before applying the functions below, or the GUC will be NULL and http_post
---      calls will fire to a NULL URL (pg_net silently drops them).
+--   1. Ensure SUPABASE_FUNCTIONS_URL is stored in Vault:
+--      Supabase Dashboard > Vault > New Secret, name = 'SUPABASE_FUNCTIONS_URL',
+--      value = 'https://<project-ref>.supabase.co/functions/v1' (no trailing slash).
+--      NOTE: `SET app.supabase_functions_url` is NOT possible on hosted Supabase
+--      (permission denied for GUCs) — Vault is the supported mechanism.
 --   2. Ensure WEBHOOK_SECRET is stored in Vault:
 --      Supabase Dashboard > Vault > New Secret, name = 'WEBHOOK_SECRET', value = <your secret>
 --      The functions read it via vault.decrypted_secrets — never hardcode it in SQL.
 --   3. pg_cron and pg_net extensions must be enabled for the project
 --      (Supabase Dashboard > Database > Extensions). The guards below are idempotent.
+--
+-- Reminder windows are 24h wide (BETWEEN day N+1 ago AND day N ago) so each
+-- patient receives at most one reminder per feature. Known limitation: if the
+-- daily cron run is missed entirely, patients age out of the window and the
+-- reminder is skipped (acceptable at current volume; revisit with a
+-- last_reminder_sent_at column if volume grows).
 
 CREATE EXTENSION IF NOT EXISTS pg_cron;
 CREATE EXTENSION IF NOT EXISTS pg_net;
 
 -- Helper: send blood-test reminder emails
--- Fires for patients in 'awaiting_blood_test' whose state_changed_at is > 14 days ago.
+-- Fires once for patients in 'awaiting_blood_test' 14 days after entering the state.
 CREATE OR REPLACE FUNCTION send_blood_test_reminders()
 RETURNS void
 LANGUAGE plpgsql
@@ -203,29 +211,45 @@ DECLARE
   _url     text;
   _patient RECORD;
   _body    jsonb;
+  _enabled boolean;
 BEGIN
+  SELECT (blood_test_reminder_enabled IS TRUE) INTO _enabled
+    FROM practitioner_settings
+   LIMIT 1;
+
+  IF NOT COALESCE(_enabled, false) THEN
+    RAISE NOTICE '[send_blood_test_reminders] feature=blood_test_reminder enabled=false skipped';
+    RETURN;
+  END IF;
+
   SELECT decrypted_secret INTO _secret
     FROM vault.decrypted_secrets
    WHERE name = 'WEBHOOK_SECRET'
    LIMIT 1;
 
-  _url := current_setting('app.supabase_functions_url', true) || '/send-email';
+  SELECT decrypted_secret INTO _url
+    FROM vault.decrypted_secrets
+   WHERE name = 'SUPABASE_FUNCTIONS_URL'
+   LIMIT 1;
+
+  _url := _url || '/send-email';
 
   FOR _patient IN
     SELECT id, first_name, email
       FROM patients
      WHERE lifecycle_state = 'awaiting_blood_test'
-       AND state_changed_at < now() - INTERVAL '14 days'
+       AND COALESCE(state_changed_at, created_at)
+           BETWEEN now() - INTERVAL '15 days' AND now() - INTERVAL '14 days'
        AND email IS NOT NULL
   LOOP
     _body := jsonb_build_object(
-      'feature',      'blood_test_reminder',
-      'patient_id',   _patient.id,
-      'patient_name', _patient.first_name,
-      'patient_email', _patient.email
+      'feature', 'blood_test_reminder',
+      'to',      _patient.email,
+      'subject', 'Blood Test Reminder',
+      'html',    '<p>Dear ' || _patient.first_name || ',</p><p>Please arrange your blood test at your earliest convenience. Your results are an important part of your personalised treatment plan.</p><p>Warm regards,<br>Hüseyin Ajuz</p>'
     );
 
-    PERFORM pg_net.http_post(
+    PERFORM net.http_post(
       url     := _url,
       body    := _body,
       headers := jsonb_build_object(
@@ -238,7 +262,7 @@ END;
 $$;
 
 -- Helper: send week-6 check-in reminder emails
--- Fires for patients in 'active_treatment' whose state_changed_at is > 42 days ago.
+-- Fires once for patients in 'active_treatment' 42 days after entering the state.
 CREATE OR REPLACE FUNCTION send_week6_checkin_reminders()
 RETURNS void
 LANGUAGE plpgsql
@@ -249,29 +273,45 @@ DECLARE
   _url     text;
   _patient RECORD;
   _body    jsonb;
+  _enabled boolean;
 BEGIN
+  SELECT (week_6_checkin_enabled IS TRUE) INTO _enabled
+    FROM practitioner_settings
+   LIMIT 1;
+
+  IF NOT COALESCE(_enabled, false) THEN
+    RAISE NOTICE '[send_week6_checkin_reminders] feature=week_6_checkin enabled=false skipped';
+    RETURN;
+  END IF;
+
   SELECT decrypted_secret INTO _secret
     FROM vault.decrypted_secrets
    WHERE name = 'WEBHOOK_SECRET'
    LIMIT 1;
 
-  _url := current_setting('app.supabase_functions_url', true) || '/send-email';
+  SELECT decrypted_secret INTO _url
+    FROM vault.decrypted_secrets
+   WHERE name = 'SUPABASE_FUNCTIONS_URL'
+   LIMIT 1;
+
+  _url := _url || '/send-email';
 
   FOR _patient IN
     SELECT id, first_name, email
       FROM patients
      WHERE lifecycle_state = 'active_treatment'
-       AND state_changed_at < now() - INTERVAL '42 days'
+       AND COALESCE(state_changed_at, created_at)
+           BETWEEN now() - INTERVAL '43 days' AND now() - INTERVAL '42 days'
        AND email IS NOT NULL
   LOOP
     _body := jsonb_build_object(
-      'feature',       'week_6_checkin',
-      'patient_id',    _patient.id,
-      'patient_name',  _patient.first_name,
-      'patient_email', _patient.email
+      'feature', 'week_6_checkin',
+      'to',      _patient.email,
+      'subject', 'Week 6 Check-in',
+      'html',    '<p>Dear ' || _patient.first_name || ',</p><p>Your 6-week check-in is due. Please reach out so we can review your progress and adjust your treatment plan if needed.</p><p>Warm regards,<br>Hüseyin Ajuz</p>'
     );
 
-    PERFORM pg_net.http_post(
+    PERFORM net.http_post(
       url     := _url,
       body    := _body,
       headers := jsonb_build_object(
@@ -284,7 +324,7 @@ END;
 $$;
 
 -- Helper: send end-review reminder emails
--- Fires for patients in 'week_6_checkin' whose state_changed_at is > 7 days ago.
+-- Fires once for patients in 'week_6_checkin' 7 days after entering the state.
 CREATE OR REPLACE FUNCTION send_end_review_reminders()
 RETURNS void
 LANGUAGE plpgsql
@@ -295,29 +335,45 @@ DECLARE
   _url     text;
   _patient RECORD;
   _body    jsonb;
+  _enabled boolean;
 BEGIN
+  SELECT (end_review_enabled IS TRUE) INTO _enabled
+    FROM practitioner_settings
+   LIMIT 1;
+
+  IF NOT COALESCE(_enabled, false) THEN
+    RAISE NOTICE '[send_end_review_reminders] feature=end_review enabled=false skipped';
+    RETURN;
+  END IF;
+
   SELECT decrypted_secret INTO _secret
     FROM vault.decrypted_secrets
    WHERE name = 'WEBHOOK_SECRET'
    LIMIT 1;
 
-  _url := current_setting('app.supabase_functions_url', true) || '/send-email';
+  SELECT decrypted_secret INTO _url
+    FROM vault.decrypted_secrets
+   WHERE name = 'SUPABASE_FUNCTIONS_URL'
+   LIMIT 1;
+
+  _url := _url || '/send-email';
 
   FOR _patient IN
     SELECT id, first_name, email
       FROM patients
      WHERE lifecycle_state = 'week_6_checkin'
-       AND state_changed_at < now() - INTERVAL '7 days'
+       AND COALESCE(state_changed_at, created_at)
+           BETWEEN now() - INTERVAL '8 days' AND now() - INTERVAL '7 days'
        AND email IS NOT NULL
   LOOP
     _body := jsonb_build_object(
-      'feature',       'end_review',
-      'patient_id',    _patient.id,
-      'patient_name',  _patient.first_name,
-      'patient_email', _patient.email
+      'feature', 'end_review',
+      'to',      _patient.email,
+      'subject', 'End Review',
+      'html',    '<p>Dear ' || _patient.first_name || ',</p><p>Your treatment end review is approaching. Please get in touch to schedule your final consultation and discuss next steps.</p><p>Warm regards,<br>Hüseyin Ajuz</p>'
     );
 
-    PERFORM pg_net.http_post(
+    PERFORM net.http_post(
       url     := _url,
       body    := _body,
       headers := jsonb_build_object(
@@ -358,7 +414,7 @@ SELECT cron.schedule('end-review-reminders', '0 8 * * *', 'SELECT send_end_revie
 -- ── M002 S05: Lead follow-up pg_cron jobs ──
 
 -- Helper: send Day-3 follow-up email to leads
--- Fires for leads whose COALESCE(state_changed_at, created_at) is 3 days ago (±1 day window).
+-- Fires for leads whose COALESCE(state_changed_at, created_at) is 3 days ago (24h window).
 CREATE OR REPLACE FUNCTION notify_lead_day3()
 RETURNS void
 LANGUAGE plpgsql
@@ -385,7 +441,12 @@ BEGIN
    WHERE name = 'WEBHOOK_SECRET'
    LIMIT 1;
 
-  _url := current_setting('app.supabase_functions_url', true) || '/send-email';
+  SELECT decrypted_secret INTO _url
+    FROM vault.decrypted_secrets
+   WHERE name = 'SUPABASE_FUNCTIONS_URL'
+   LIMIT 1;
+
+  _url := _url || '/send-email';
 
   FOR _patient IN
     SELECT id, first_name, email
@@ -401,7 +462,7 @@ BEGIN
       'html',    '<p>Hi ' || _patient.first_name || ',</p><p>I wanted to follow up on your interest in our hair loss consultation programme. I''d love to help you understand what''s causing your hair loss and put together a personalised plan for you.</p><p>Feel free to reply to this email or reach out via WhatsApp to book a slot.</p><p>Best,<br>Hüseyin Ajuz</p>'
     );
 
-    PERFORM pg_net.http_post(
+    PERFORM net.http_post(
       url     := _url,
       body    := _body,
       headers := jsonb_build_object(
@@ -414,7 +475,7 @@ END;
 $$;
 
 -- Helper: send Day-7 follow-up email to leads
--- Fires for leads whose COALESCE(state_changed_at, created_at) is 7 days ago (±1 day window).
+-- Fires for leads whose COALESCE(state_changed_at, created_at) is 7 days ago (24h window).
 CREATE OR REPLACE FUNCTION notify_lead_day7()
 RETURNS void
 LANGUAGE plpgsql
@@ -441,7 +502,12 @@ BEGIN
    WHERE name = 'WEBHOOK_SECRET'
    LIMIT 1;
 
-  _url := current_setting('app.supabase_functions_url', true) || '/send-email';
+  SELECT decrypted_secret INTO _url
+    FROM vault.decrypted_secrets
+   WHERE name = 'SUPABASE_FUNCTIONS_URL'
+   LIMIT 1;
+
+  _url := _url || '/send-email';
 
   FOR _patient IN
     SELECT id, first_name, email
@@ -457,7 +523,7 @@ BEGIN
       'html',    '<p>Hi ' || _patient.first_name || ',</p><p>A week has passed since you first reached out. Hair loss can be tricky to address without the right guidance — that''s exactly what we specialise in.</p><p>If you have any questions before booking, just hit reply. I''m happy to chat.</p><p>Best,<br>Hüseyin Ajuz</p>'
     );
 
-    PERFORM pg_net.http_post(
+    PERFORM net.http_post(
       url     := _url,
       body    := _body,
       headers := jsonb_build_object(
@@ -470,7 +536,7 @@ END;
 $$;
 
 -- Helper: send Day-12 follow-up email to leads
--- Fires for leads whose COALESCE(state_changed_at, created_at) is 12 days ago (±1 day window).
+-- Fires for leads whose COALESCE(state_changed_at, created_at) is 12 days ago (24h window).
 CREATE OR REPLACE FUNCTION notify_lead_day12()
 RETURNS void
 LANGUAGE plpgsql
@@ -497,7 +563,12 @@ BEGIN
    WHERE name = 'WEBHOOK_SECRET'
    LIMIT 1;
 
-  _url := current_setting('app.supabase_functions_url', true) || '/send-email';
+  SELECT decrypted_secret INTO _url
+    FROM vault.decrypted_secrets
+   WHERE name = 'SUPABASE_FUNCTIONS_URL'
+   LIMIT 1;
+
+  _url := _url || '/send-email';
 
   FOR _patient IN
     SELECT id, first_name, email
@@ -513,7 +584,7 @@ BEGIN
       'html',    '<p>Hi ' || _patient.first_name || ',</p><p>This is my final follow-up. I don''t want to overwhelm your inbox — but I did want to make sure you hadn''t missed us.</p><p>If you''re still interested in understanding and tackling your hair loss, I''d love to help. Just reply and we''ll take it from there.</p><p>Best,<br>Hüseyin Ajuz</p>'
     );
 
-    PERFORM pg_net.http_post(
+    PERFORM net.http_post(
       url     := _url,
       body    := _body,
       headers := jsonb_build_object(
@@ -572,10 +643,12 @@ END;
 $$;
 SELECT cron.schedule('lead-followup-day12', '0 9 * * *', 'SELECT notify_lead_day12();');
 
+-- auto-cold runs at 10:00 UTC — one hour AFTER lead-followup-day12 (09:00 UTC),
+-- so the final "last chance" email always fires before the lead is moved to cold.
 DO $$
 BEGIN
   PERFORM cron.unschedule('auto-cold-leads');
   EXCEPTION WHEN others THEN NULL;
 END;
 $$;
-SELECT cron.schedule('auto-cold-leads', '0 9 * * *', 'SELECT auto_cold_leads();');
+SELECT cron.schedule('auto-cold-leads', '0 10 * * *', 'SELECT auto_cold_leads();');
