@@ -1,9 +1,11 @@
 import { type FormEvent, useState } from "react";
+import { useNavigate } from "react-router";
 import { Button, Card, Input } from "@/components/ui";
 import { useAuth } from "@/context/auth";
 
 export default function LoginPage() {
   const { signIn } = useAuth();
+  const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -19,8 +21,9 @@ export default function LoginPage() {
     if (authError) {
       setError(authError.message);
       setLoading(false);
+    } else {
+      navigate("/", { replace: true });
     }
-    // On success, onAuthStateChange fires and the router redirects automatically.
   }
 
   return (
