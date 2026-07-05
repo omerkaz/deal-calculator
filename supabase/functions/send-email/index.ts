@@ -84,11 +84,9 @@ Deno.serve(async (req: Request) => {
     return jsonResponse({ error: "Server configuration error: RESEND_API_KEY not configured" }, 500);
   }
 
+  // Optional: when unset, the single practitioner_settings row is used instead
+  // (single-practitioner system, D014).
   const practitionerUserId = Deno.env.get("PRACTITIONER_USER_ID");
-  if (!practitionerUserId) {
-    console.error("[send-email] Missing PRACTITIONER_USER_ID");
-    return jsonResponse({ error: "Server configuration error: PRACTITIONER_USER_ID not configured" }, 500);
-  }
 
   // ── Auth validation ──
   // Accept either:
@@ -166,10 +164,12 @@ Deno.serve(async (req: Request) => {
   });
 
   try {
-    const { data: settings, error: settingsError } = await supabase
-      .from("practitioner_settings")
-      .select("*")
-      .eq("user_id", practitionerUserId)
+    let settingsQuery = supabase.from("practitioner_settings").select("*");
+    if (practitionerUserId) {
+      settingsQuery = settingsQuery.eq("user_id", practitionerUserId);
+    }
+    const { data: settings, error: settingsError } = await settingsQuery
+      .limit(1)
       .maybeSingle();
 
     if (settingsError) {

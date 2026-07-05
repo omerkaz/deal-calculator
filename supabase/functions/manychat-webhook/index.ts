@@ -67,11 +67,6 @@ Deno.serve(async (req: Request) => {
     return jsonResponse({ error: "Server configuration error: webhook secret not configured" }, 500);
   }
 
-  if (!practitionerUserId) {
-    console.error("[manychat-webhook] Missing PRACTITIONER_USER_ID env var");
-    return jsonResponse({ error: "Server configuration error: practitioner user not configured" }, 500);
-  }
-
   // ── Secret validation ──
   // Accept secret via Authorization: Bearer <secret> header or ?secret=<value> query param
   const authHeader = req.headers.get("authorization");
@@ -142,7 +137,6 @@ Deno.serve(async (req: Request) => {
     lifecycle_state: "lead",
     manychat_id: String(manychatId),
     instagram_username: instagramUsername,
-    created_by: practitionerUserId,
   };
 
   // ── Supabase admin client (bypasses RLS) ──
@@ -150,11 +144,30 @@ Deno.serve(async (req: Request) => {
     auth: { autoRefreshToken: false, persistSession: false },
   });
 
+  // ── Resolve practitioner ──
+  // PRACTITIONER_USER_ID env var wins when set; otherwise fall back to the
+  // single practitioner_settings row (single-practitioner system, D014).
+  let resolvedPractitionerId: string | null = practitionerUserId ?? null;
+  if (!resolvedPractitionerId) {
+    const { data: settingsRow } = await supabase
+      .from("practitioner_settings")
+      .select("user_id")
+      .limit(1)
+      .maybeSingle();
+    resolvedPractitionerId = settingsRow?.user_id ?? null;
+  }
+  if (!resolvedPractitionerId) {
+    console.error("[manychat-webhook] No PRACTITIONER_USER_ID env var and no practitioner_settings row");
+    return jsonResponse({ error: "Server configuration error: practitioner user not configured" }, 500);
+  }
+
+  const patientRecord = { ...patientData, created_by: resolvedPractitionerId };
+
   try {
     // Upsert: insert new or update existing by manychat_id unique constraint
     const { data, error } = await supabase
       .from("patients")
-      .upsert(patientData, { onConflict: "manychat_id" })
+      .upsert(patientRecord, { onConflict: "manychat_id" })
       .select("id, manychat_id")
       .single();
 
