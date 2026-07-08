@@ -287,25 +287,29 @@ npm run preview
 
 All 6 slices delivered. 116 modules, 0 TypeScript errors. 12 node:test assertions pass.
 
-**Known gaps (environment, not code):**
-- Live Supabase instance provisioned (`hbhepcucokwlagqygwrz`) but runtime verification pending
-- ESLint not yet wired
-- Session persistence across refresh untested against real backend
+**Known gaps:** ESLint not yet wired.
 
-### M002: Automation & Polish — 🔄 IN PROGRESS
+### M002: Automation & Polish — ✅ COMPLETE + HARDENED (2026-07-06)
 
-5 slices planned:
-1. **S01: Polish & Live Deploy** — wire ESLint, deploy manychat-webhook to live Supabase
-2. **S02: Resend Setup & CRM Settings** — email provider, SPF/DKIM, settings table + page
-3. **S03: Welcome Email** — trigger on patient creation, opt-in toggle
-4. **S04: Lifecycle Reminders** — pg_cron + pg_net for blood-test, week-6, end-review emails; `state_changed_at` migration
-5. **S05: Lead Follow-up** — Day 3/7/12 outreach, auto-Cold transition
+All 5 slices delivered (webhook deploy, Resend + settings, welcome email,
+lifecycle reminders, lead follow-up). A post-ship hardening pass fixed critical
+bugs that shipped silently broken and verified the email chain end-to-end in
+production — see `.planning/milestones/v1.1-automation-polish.md` for the full
+bug/fix table and verification evidence.
 
-**Key M002 decisions:**
-- Email provider: **Resend** (via `fetch()`, no SDK)
-- Scheduling: **pg_cron + pg_net** → Edge Function
-- Settings: single-row table per practitioner with boolean toggles
-- Sender domain: Resend subdomain for M002, custom domain deferred to M003
+**Live verified:** login → dashboard → settings; webhook 201 with correct RLS
+attribution; cron → `net.http_post` → send-email → Resend `sent:true`. All 7
+email toggles OFF (opt-in) until Hüseyin enables them in Settings.
+
+**Blocking limitation:** sender is `onboarding@resend.dev` (sandbox) — cannot
+email real patients until a custom domain + SPF/DKIM is verified (top v1.2 item).
+
+### Planning docs (GSD 1.6.1)
+
+GSD-3 and its `~/.gsd/` state were removed 2026-07-06 (malware remediation).
+Planning now lives **in-repo** under `.planning/` (GSD 1.6.1, workflow-based:
+`~/.claude/gsd-core/`). Milestones renumbered: M001→v1.0, M002→v1.1, M003→v1.2
+(Deliverability & Scheduling, unscoped), M004→v1.3 (Web Presence).
 
 ---
 
@@ -322,6 +326,10 @@ All 6 slices delivered. 116 modules, 0 TypeScript errors. 12 node:test assertion
 | D012 | Resend via fetch() from Edge Functions | Deno runtime, no npm |
 | D013 | pg_cron + pg_net for scheduling | All within Supabase platform |
 | D014 | Single-row settings table per practitioner | Simple, RLS-safe, extensible |
+| D015 | Edge Functions resolve practitioner from settings row when `PRACTITIONER_USER_ID` env unset | Env was never set on live project; settings row is the natural single-practitioner registry |
+| D016 | Functions URL + secrets read from Vault, never GUCs | `SET app.*` is not permitted on hosted Supabase |
+| D017 | Reminder crons use 24h `BETWEEN` windows + `COALESCE(state_changed_at, created_at)` | One reminder per patient per feature; missed-cron gap accepted at current volume |
+| D018 | `auto_cold_leads` at 10:00 UTC, after day-12 email at 09:00 | "Last chance" email must fire before the lead goes cold |
 
 ---
 
