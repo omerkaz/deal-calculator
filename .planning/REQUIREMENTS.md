@@ -54,10 +54,10 @@
 
 | Requirement | Phase |
 |-------------|-------|
-| MAIL-01 | — (filled by roadmap) |
-| MAIL-02 | — |
-| MAIL-03 | — |
-| MAIL-04 | — |
+| MAIL-01 | Phase 13 |
+| MAIL-02 | Phase 14 |
+| MAIL-03 | Phase 13 |
+| MAIL-04 | Phase 12 |
 
 ## Future Requirements (deferred to v1.3+)
 
