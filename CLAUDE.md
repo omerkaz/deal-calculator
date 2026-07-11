@@ -223,10 +223,14 @@ All have RLS enabled. `updated_at` trigger auto-fires on patients.
 - **Behavior:** Upserts patient by `manychat_id` unique constraint. New patients get `lifecycle_state: 'lead'`.
 - **Required env vars:** `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `WEBHOOK_SECRET`, `PRACTITIONER_USER_ID`
 
-### send-email (M002 — planned)
+### send-email (v2, deployed)
 
-- Will call Resend API via `fetch()` — no npm SDK (Deno runtime)
-- Called by pg_net from pg_cron jobs for scheduled emails
+- **Path:** `supabase/functions/send-email/index.ts`
+- **Auth:** `WEBHOOK_SECRET` bearer (pg_cron callers) OR valid session JWT (browser callers)
+- **Behavior:** validates `{feature, to, subject, html}`, gates on the matching
+  `practitioner_settings` toggle, sends via Resend API `fetch()` (no npm SDK)
+- Called by `net.http_post` from the pg_cron functions and by `src/lib/email.ts`
+- Sender is sandbox `onboarding@resend.dev` until custom domain (v1.2)
 
 ---
 
@@ -238,9 +242,10 @@ VITE_SUPABASE_ANON_KEY=<anon-key>
 ```
 
 Edge Function env vars (set via `supabase secrets set`):
-- `WEBHOOK_SECRET` — shared secret for ManyChat auth
-- `PRACTITIONER_USER_ID` — Hüseyin's auth.users UUID
-- `RESEND_API_KEY` — for M002 email sends
+- `WEBHOOK_SECRET` — shared secret for ManyChat/cron auth
+- `RESEND_API_KEY` — for email sends
+- `PRACTITIONER_USER_ID` — optional (D015): not set on live; functions fall
+  back to the `practitioner_settings` row
 
 ---
 
