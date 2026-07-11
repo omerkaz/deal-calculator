@@ -1,6 +1,6 @@
 ---
-name: notion-board
-description: Manage the Hüseyin Ajuz CRM project kanban board in Notion — list cards by column, create cards, move cards between statuses, append notes, archive. Use when asked to update the Notion board, sync planning state to Notion, track milestone/requirement cards, or check what's on the board. Triggers - "notion", "kanban", "board", "move card", "add card".
+name: ajuz-crm-board
+description: Manage the Hüseyin Ajuz CRM Notion kanban board (this project only) — list cards by column, create cards, move cards between statuses, append notes, archive. Use when asked to update the Notion board, sync planning state to Notion, track milestone/requirement cards, or check what's on the board. Triggers - "notion", "kanban", "board", "move card", "add card".
 compatibility: Requires Node 18+ and NOTION_API_KEY (env or ~/.secrets). Project-specific — targets one hardcoded Notion database.
 ---
 
@@ -15,30 +15,30 @@ CLI for the project's Notion kanban board (database `8b4eb459-1241-8394-8bba-817
 All commands run from the repo root:
 
 ```bash
-node .pi/skills/notion-board/scripts/board.js <command>
+node .pi/skills/ajuz-crm-board/scripts/board.js <command>
 ```
 
 ```bash
 # List all cards grouped by column (or one column)
-node .pi/skills/notion-board/scripts/board.js list
-node .pi/skills/notion-board/scripts/board.js list --status "Not started"
+node .pi/skills/ajuz-crm-board/scripts/board.js list
+node .pi/skills/ajuz-crm-board/scripts/board.js list --status "Not started"
 
 # Show a card's properties + body (name matched by substring, must be unique)
-node .pi/skills/notion-board/scripts/board.js show "MAIL-01"
+node .pi/skills/ajuz-crm-board/scripts/board.js show "MAIL-01"
 
 # Create a card
-node .pi/skills/notion-board/scripts/board.js add "MAIL-03: Bounce handling" \
+node .pi/skills/ajuz-crm-board/scripts/board.js add "MAIL-03: Bounce handling" \
   --status "Not started" --team Engineering --keywords "v1.2,Email" \
   --body "Handle Resend bounce webhooks."
 
 # Move a card between columns
-node .pi/skills/notion-board/scripts/board.js move "MAIL-01" --status "In development"
+node .pi/skills/ajuz-crm-board/scripts/board.js move "MAIL-01" --status "In development"
 
 # Append a progress note to a card body
-node .pi/skills/notion-board/scripts/board.js append "MAIL-01" --body "DNS records added, awaiting verification."
+node .pi/skills/ajuz-crm-board/scripts/board.js append "MAIL-01" --body "DNS records added, awaiting verification."
 
 # Archive a card (reversible via Notion Trash)
-node .pi/skills/notion-board/scripts/board.js archive "Chore: Wire ESLint"
+node .pi/skills/ajuz-crm-board/scripts/board.js archive "Chore: Wire ESLint"
 ```
 
 ## Board schema
