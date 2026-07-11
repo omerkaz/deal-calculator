@@ -35,26 +35,44 @@
 - [x] **AUTH-02**: Session persists across refresh (INITIAL_SESSION gate)
 - [x] **AUTH-03**: RequireAuth layout guard; RLS on all tables
 
-## Next Milestone Requirements (to be scoped)
+## v1.2 Requirements — Deliverability (scoped 2026-07-11)
 
-### Email Deliverability — critical path
+### Email Deliverability (MAIL)
 
-- [ ] **MAIL-01**: Custom sending domain on Resend with SPF/DKIM verified
-      (sandbox sender cannot email real patients — blocks all AUTO-02..04 in practice)
-- [ ] **MAIL-02**: Optional — `last_reminder_sent_at` for at-least-once reminder delivery
+- [ ] **MAIL-01**: Automation emails are sent from `mrhus@huseyinacuz.com` —
+      domain `huseyinacuz.com` verified on Resend (SPF/DKIM records in GoDaddy DNS),
+      `send-email` sender switched, delivery confirmed to a real inbox (not spam)
+- [ ] **MAIL-02**: Reminder emails survive missed cron runs — `last_reminder_sent_at`
+      tracked per patient/feature; at-least-once delivery replaces 24h BETWEEN windows (D017 revisit)
+- [ ] **MAIL-03**: Patient-facing emails have a professional identity — from-name
+      "Hüseyin Ajuz", reply-to `mrhus@huseyinacuz.com`, consistent footer across all 7 templates
+- [ ] **MAIL-04**: Hüseyin's regular Google Workspace mail is SPF-protected —
+      `v=spf1 include:_spf.google.com ~all` TXT added to `huseyinacuz.com`
+      (domain currently has NO SPF record)
 
-### Calendar (R013 in old numbering)
+### Traceability
 
-- [ ] **CAL-01**: Appointment scheduling integration (Google Calendar or Calendly)
+| Requirement | Phase |
+|-------------|-------|
+| MAIL-01 | — (filled by roadmap) |
+| MAIL-02 | — |
+| MAIL-03 | — |
+| MAIL-04 | — |
 
-### Documents (R014 in old numbering)
+## Future Requirements (deferred to v1.3+)
 
-- [ ] **DOC-01**: PDF protocol delivery/export for patients
-
-## Deferred (tracked, not scoped)
-
+- **CAL-01**: Appointment scheduling integration (Google Calendar or Calendly) —
+      no specification yet; needs discuss session with Hüseyin (old R013)
+- **DOC-01**: PDF protocol delivery/export — no protocol template exists;
+      blocked on content from Hüseyin (old R014)
+- **MSG-01**: ManyChat outbound messaging (WhatsApp/IG) — SEED-001; API key
+      verified 2026-07-11, Pro account confirmed
 - **WEB-01**: Landing page redesign — huseyinajuz.com on Netlify (R016, old M004)
-- Mobile app; SaaS multi-tenant
+
+## Out of Scope
+
+- DMARC policy record — optional hardening, ride-along candidate for v1.3
+- PayPal/Stripe integration; mobile app; SaaS multi-tenant
 
 ---
 *Requirement IDs re-keyed by category during GSD 1.6.1 migration; old R### numbers noted where known.*
