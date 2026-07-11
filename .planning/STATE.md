@@ -1,19 +1,30 @@
+---
+gsd_state_version: 1.0
+milestone: v1.2
+milestone_name: Deliverability
+status: planning
+last_updated: "2026-07-11T16:10:04.922Z"
+last_activity: 2026-07-11
+progress:
+  total_phases: 0
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
+  percent: 0
+---
+
 # Project State
 
-**Last updated:** 2026-07-06
-**Current milestone:** Between milestones — v1.1 shipped + hardened; v1.2 not yet scoped
-**Current phase:** None active
+**Last updated:** 2026-07-11
+**Current milestone:** v1.2 Deliverability (planning)
+**Current phase:** None active — defining requirements
 
 ## Current Position
 
-v1.0 (Core CRM) and v1.1 (Automation & Polish) are shipped and live on Supabase
-project `hbhepcucokwlagqygwrz`. A production hardening pass on 2026-07-06
-verified the full email automation chain end-to-end and fixed critical bugs
-that shipped silently broken (see `milestones/v1.1-automation-polish.md`).
-
-**Next action:** Scope v1.2 via the new-milestone workflow. The #1 candidate is
-the custom email domain (SPF/DKIM) — without it, automation emails cannot reach
-real patients (Resend sandbox sender restriction).
+Phase: Not started (defining requirements)
+Plan: —
+Status: Defining requirements
+Last activity: 2026-07-11 — Milestone v1.2 started
 
 ## Verified Production State (2026-07-06)
 
@@ -30,10 +41,13 @@ real patients (Resend sandbox sender restriction).
   practitioner from the `practitioner_settings` row (D015). Setting the env var
   requires `supabase login` (Management API scope `edge_functions_secrets_write`
   is missing from the MCP OAuth token).
+
 - Vault secrets (authoritative): `WEBHOOK_SECRET`, `RESEND_API_KEY`,
   `SUPABASE_FUNCTIONS_URL`, `PRACTITIONER_USER_ID` (correct UUID; `_V2` deleted)
+
 - `supabase/schema.sql` is the single source of truth and matches the live DB
   (migration `fix_cron_email_functions` applied 2026-07-06)
+
 - GitHub remote is misnamed `deal-calculator` — rename someday
 - Dev app runs on tmux `pit-18:app` at http://localhost:5174 (5173 occupied)
 

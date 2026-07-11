@@ -23,6 +23,18 @@ lead or forgets a follow-up — the pipeline is the practice.
 - **Success metric**: Active clients in treatment states; zero dropped leads
 - **Strategy notes**: Patient data is sensitive medical information — privacy first
 
+## Current Milestone: v1.2 Deliverability
+
+**Goal:** Automation emails reach real patients from a verified sender identity (`mrhus@huseyinacuz.com` via Resend), reliably.
+
+**Target features:**
+- Custom sending domain `huseyinacuz.com` verified on Resend (SPF/DKIM via GoDaddy DNS) + sender switch in `send-email`
+- `last_reminder_sent_at` at-least-once reminder delivery (D017 revisit)
+- Sender identity polish: from-name, reply-to, email footer
+- Bonus: add missing Google Workspace SPF record on `huseyinacuz.com` (regular mail currently unprotected)
+
+**Key context:** Both domains (`huseyinajuz.com` site, `huseyinacuz.com` email) are on GoDaddy DNS — Netlify only serves the site. GoDaddy access confirmed 2026-07-11. `huseyinacuz.com` mail is Google Workspace (`smtp.google.com` MX). CAL-01 and DOC-01 deferred to v1.3 (no spec / no protocol template yet).
+
 ## Requirements
 
 ### Validated
@@ -36,12 +48,16 @@ lead or forgets a follow-up — the pipeline is the practice.
 - ✓ Settings page with 7 opt-in email toggles (practitioner_settings) — v1.1
 - ✓ Auth (email/password, session persistence, RequireAuth guard) — v1.0
 
-### Active
+### Active (v1.2)
 
-- [ ] R013: Calendar / appointment integration (Google Calendar or Calendly)
-- [ ] R014: PDF protocol delivery/export
-- [ ] Custom email domain + SPF/DKIM (Resend) — **critical path: sandbox sender
+- [ ] MAIL-01: Custom email domain + SPF/DKIM (Resend) — **critical path: sandbox sender
       `onboarding@resend.dev` cannot email real patients**
+- [ ] MAIL-02: `last_reminder_sent_at` at-least-once reminder delivery (D017 revisit)
+
+### Deferred to v1.3
+
+- R013 / CAL-01: Calendar / appointment integration — no specification yet; needs discuss session with Hüseyin
+- R014 / DOC-01: PDF protocol delivery/export — no protocol template exists; blocked on content from Hüseyin
 
 ### Out of Scope
 
@@ -84,5 +100,22 @@ lead or forgets a follow-up — the pipeline is the practice.
 | D017 (hardening): Reminder crons use 24h BETWEEN windows | One reminder per patient per feature; accepted missed-cron gap | ⚠️ Revisit if volume grows (`last_reminder_sent_at`) |
 | D018 (hardening): auto-cold at 10:00, after day-12 email at 09:00 | "Last chance" email must precede cold transition | ✓ Good |
 
+## Evolution
+
+This document evolves at phase transitions and milestone boundaries.
+
+**After each phase transition** (via `/gsd-transition`):
+1. Requirements invalidated? → Move to Out of Scope with reason
+2. Requirements validated? → Move to Validated with phase reference
+3. New requirements emerged? → Add to Active
+4. Decisions to log? → Add to Key Decisions
+5. "What This Is" still accurate? → Update if drifted
+
+**After each milestone** (via `/gsd-complete-milestone`):
+1. Full review of all sections
+2. Core Value check — still the right priority?
+3. Audit Out of Scope — reasons still valid?
+4. Update Context with current state
+
 ---
-*Last updated: 2026-07-06 after GSD-3 → GSD 1.6.1 migration + production hardening pass*
+*Last updated: 2026-07-11 — milestone v1.2 Deliverability started*
