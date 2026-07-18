@@ -463,8 +463,9 @@ SELECT cron.schedule('end-review-reminders', '0 8 * * *', 'SELECT send_end_revie
 
 -- ── M002 S05: Lead follow-up pg_cron jobs ──
 
--- Helper: send Day-3 follow-up email to leads
--- Fires for leads whose COALESCE(state_changed_at, created_at) is 3 days ago (24h window).
+-- Helper: send Day-3 follow-up email to leads (at-least-once)
+-- Fires for leads ≥3 days after entering lead state,
+-- if no email_send_log record exists for this lifecycle run.
 CREATE OR REPLACE FUNCTION notify_lead_day3()
 RETURNS void
 LANGUAGE plpgsql
@@ -502,8 +503,14 @@ BEGIN
     SELECT id, first_name, email
       FROM patients
      WHERE lifecycle_state = 'lead'
-       AND COALESCE(state_changed_at, created_at) BETWEEN now() - INTERVAL '4 days' AND now() - INTERVAL '3 days'
+       AND COALESCE(state_changed_at, created_at) <= now() - INTERVAL '3 days'
        AND email IS NOT NULL
+       AND NOT EXISTS (
+         SELECT 1 FROM email_send_log esl
+          WHERE esl.patient_id = patients.id
+            AND esl.feature = 'lead_day3'
+            AND esl.sent_at >= COALESCE(patients.state_changed_at, patients.created_at)
+       )
   LOOP
     _body := jsonb_build_object(
       'feature', 'lead_day3',
@@ -520,12 +527,16 @@ BEGIN
         'Authorization', 'Bearer ' || _secret
       )
     );
+
+    INSERT INTO email_send_log (patient_id, feature)
+    VALUES (_patient.id, 'lead_day3');
   END LOOP;
 END;
 $$;
 
--- Helper: send Day-7 follow-up email to leads
--- Fires for leads whose COALESCE(state_changed_at, created_at) is 7 days ago (24h window).
+-- Helper: send Day-7 follow-up email to leads (at-least-once)
+-- Fires for leads ≥7 days after entering lead state,
+-- if no email_send_log record exists for this lifecycle run.
 CREATE OR REPLACE FUNCTION notify_lead_day7()
 RETURNS void
 LANGUAGE plpgsql
@@ -563,8 +574,14 @@ BEGIN
     SELECT id, first_name, email
       FROM patients
      WHERE lifecycle_state = 'lead'
-       AND COALESCE(state_changed_at, created_at) BETWEEN now() - INTERVAL '8 days' AND now() - INTERVAL '7 days'
+       AND COALESCE(state_changed_at, created_at) <= now() - INTERVAL '7 days'
        AND email IS NOT NULL
+       AND NOT EXISTS (
+         SELECT 1 FROM email_send_log esl
+          WHERE esl.patient_id = patients.id
+            AND esl.feature = 'lead_day7'
+            AND esl.sent_at >= COALESCE(patients.state_changed_at, patients.created_at)
+       )
   LOOP
     _body := jsonb_build_object(
       'feature', 'lead_day7',
@@ -581,12 +598,16 @@ BEGIN
         'Authorization', 'Bearer ' || _secret
       )
     );
+
+    INSERT INTO email_send_log (patient_id, feature)
+    VALUES (_patient.id, 'lead_day7');
   END LOOP;
 END;
 $$;
 
--- Helper: send Day-12 follow-up email to leads
--- Fires for leads whose COALESCE(state_changed_at, created_at) is 12 days ago (24h window).
+-- Helper: send Day-12 follow-up email to leads (at-least-once)
+-- Fires for leads ≥12 days after entering lead state,
+-- if no email_send_log record exists for this lifecycle run.
 CREATE OR REPLACE FUNCTION notify_lead_day12()
 RETURNS void
 LANGUAGE plpgsql
@@ -624,8 +645,14 @@ BEGIN
     SELECT id, first_name, email
       FROM patients
      WHERE lifecycle_state = 'lead'
-       AND COALESCE(state_changed_at, created_at) BETWEEN now() - INTERVAL '13 days' AND now() - INTERVAL '12 days'
+       AND COALESCE(state_changed_at, created_at) <= now() - INTERVAL '12 days'
        AND email IS NOT NULL
+       AND NOT EXISTS (
+         SELECT 1 FROM email_send_log esl
+          WHERE esl.patient_id = patients.id
+            AND esl.feature = 'lead_day12'
+            AND esl.sent_at >= COALESCE(patients.state_changed_at, patients.created_at)
+       )
   LOOP
     _body := jsonb_build_object(
       'feature', 'lead_day12',
@@ -642,6 +669,9 @@ BEGIN
         'Authorization', 'Bearer ' || _secret
       )
     );
+
+    INSERT INTO email_send_log (patient_id, feature)
+    VALUES (_patient.id, 'lead_day12');
   END LOOP;
 END;
 $$;
