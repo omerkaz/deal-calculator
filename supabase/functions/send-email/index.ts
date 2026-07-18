@@ -17,6 +17,33 @@ const VALID_FEATURES = [
 
 type FeatureKey = (typeof VALID_FEATURES)[number];
 
+// ── Email footer (injected into every outbound email) ──
+const FOOTER_HTML = `
+<hr style="border:none;border-top:1px solid #e5e5e5;margin:24px 0 16px">
+<p style="font-size:13px;color:#7a756e;margin:0">
+  Warm regards,<br>
+  <strong>Hüseyin Ajuz</strong> · Hair Loss Specialist<br>
+  <a href="mailto:mrhus@huseyinacuz.com" style="color:#2A9D8F;text-decoration:none">mrhus@huseyinacuz.com</a>
+</p>
+`;
+
+const FOOTER_TEXT = `\n---\nWarm regards,\nHüseyin Ajuz · Hair Loss Specialist\nmrhus@huseyinacuz.com\n`;
+
+/** Inject footer into HTML — before </body> if present, otherwise append */
+function injectHtmlFooter(html: string): string {
+  const trimmed = html.trim();
+  const bodyCloseIdx = trimmed.toLowerCase().lastIndexOf("</body>");
+  if (bodyCloseIdx !== -1) {
+    return trimmed.slice(0, bodyCloseIdx) + FOOTER_HTML + trimmed.slice(bodyCloseIdx);
+  }
+  return trimmed + FOOTER_HTML;
+}
+
+/** Inject footer into plain-text version */
+function injectTextFooter(text: string): string {
+  return text.trim() + FOOTER_TEXT;
+}
+
 // ── CORS headers ──
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -186,14 +213,15 @@ Deno.serve(async (req: Request) => {
 
     // ── Send via Resend API ──
     const resendPayload: Record<string, unknown> = {
-      from: "Hüseyin Ajuz <onboarding@resend.dev>",
+      from: "Hüseyin Ajuz <mrhus@huseyinacuz.com>",
+      reply_to: "mrhus@huseyinacuz.com",
       to: [to.trim()],
       subject: subject.trim(),
-      html: html.trim(),
+      html: injectHtmlFooter(html as string),
     };
 
     if (typeof text === "string" && text.trim()) {
-      resendPayload.text = text.trim();
+      resendPayload.text = injectTextFooter(text as string);
     }
 
     const resendRes = await fetch("https://api.resend.com/emails", {

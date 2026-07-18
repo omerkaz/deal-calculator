@@ -33,8 +33,8 @@ export async function sendWelcomeEmail(params: {
         feature: "welcome_email",
         to: params.to,
         subject: "Welcome — Hüseyin Ajuz Hair Loss Consultation",
-        html: `<p>Dear ${params.firstName},</p><p>Thank you for registering with Hüseyin Ajuz. We will be in touch shortly to guide you through your personalised hair loss treatment journey.</p><p>Warm regards,<br>Hüseyin Ajuz</p>`,
-        text: `Dear ${params.firstName}, Thank you for registering with Hüseyin Ajuz. We will be in touch shortly. Warm regards, Hüseyin Ajuz`,
+        html: `<p>Dear ${params.firstName},</p><p>Thank you for registering with Hüseyin Ajuz. We will be in touch shortly to guide you through your personalised hair loss treatment journey.</p>`,
+        text: `Dear ${params.firstName},\n\nThank you for registering with Hüseyin Ajuz. We will be in touch shortly to guide you through your personalised hair loss treatment journey.`,
       }),
     });
 
@@ -58,17 +58,17 @@ function buildReminderContent(
     case "blood_test_reminder":
       return {
         subject: "Blood Test Reminder",
-        html: `<p>Dear ${firstName},</p><p>Please arrange your blood test at your earliest convenience. Your results are an important part of your personalised treatment plan.</p><p>Warm regards,<br>Hüseyin Ajuz</p>`,
+        html: `<p>Dear ${firstName},</p><p>Please arrange your blood test at your earliest convenience. Your results are an important part of your personalised treatment plan.</p>`,
       };
     case "week_6_checkin":
       return {
         subject: "Week 6 Check-in",
-        html: `<p>Dear ${firstName},</p><p>Your 6-week check-in is due. Please reach out so we can review your progress and adjust your treatment plan if needed.</p><p>Warm regards,<br>Hüseyin Ajuz</p>`,
+        html: `<p>Dear ${firstName},</p><p>Your 6-week check-in is due. Please reach out so we can review your progress and adjust your treatment plan if needed.</p>`,
       };
     case "end_review":
       return {
         subject: "End Review",
-        html: `<p>Dear ${firstName},</p><p>Your treatment end review is approaching. Please get in touch to schedule your final consultation and discuss next steps.</p><p>Warm regards,<br>Hüseyin Ajuz</p>`,
+        html: `<p>Dear ${firstName},</p><p>Your treatment end review is approaching. Please get in touch to schedule your final consultation and discuss next steps.</p>`,
       };
   }
 }

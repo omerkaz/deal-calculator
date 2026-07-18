@@ -275,7 +275,7 @@ BEGIN
       'feature', 'blood_test_reminder',
       'to',      _patient.email,
       'subject', 'Blood Test Reminder',
-      'html',    '<p>Dear ' || _patient.first_name || ',</p><p>Please arrange your blood test at your earliest convenience. Your results are an important part of your personalised treatment plan.</p><p>Warm regards,<br>Hüseyin Ajuz</p>'
+      'html',    '<p>Dear ' || _patient.first_name || ',</p><p>Please arrange your blood test at your earliest convenience. Your results are an important part of your personalised treatment plan.</p>'
     );
 
     PERFORM net.http_post(
@@ -346,7 +346,7 @@ BEGIN
       'feature', 'week_6_checkin',
       'to',      _patient.email,
       'subject', 'Week 6 Check-in',
-      'html',    '<p>Dear ' || _patient.first_name || ',</p><p>Your 6-week check-in is due. Please reach out so we can review your progress and adjust your treatment plan if needed.</p><p>Warm regards,<br>Hüseyin Ajuz</p>'
+      'html',    '<p>Dear ' || _patient.first_name || ',</p><p>Your 6-week check-in is due. Please reach out so we can review your progress and adjust your treatment plan if needed.</p>'
     );
 
     PERFORM net.http_post(
@@ -417,7 +417,7 @@ BEGIN
       'feature', 'end_review',
       'to',      _patient.email,
       'subject', 'End Review',
-      'html',    '<p>Dear ' || _patient.first_name || ',</p><p>Your treatment end review is approaching. Please get in touch to schedule your final consultation and discuss next steps.</p><p>Warm regards,<br>Hüseyin Ajuz</p>'
+      'html',    '<p>Dear ' || _patient.first_name || ',</p><p>Your treatment end review is approaching. Please get in touch to schedule your final consultation and discuss next steps.</p>'
     );
 
     PERFORM net.http_post(
@@ -516,7 +516,7 @@ BEGIN
       'feature', 'lead_day3',
       'to',      _patient.email,
       'subject', 'Following up on your hair loss consultation',
-      'html',    '<p>Hi ' || _patient.first_name || ',</p><p>I wanted to follow up on your interest in our hair loss consultation programme. I''d love to help you understand what''s causing your hair loss and put together a personalised plan for you.</p><p>Feel free to reply to this email or reach out via WhatsApp to book a slot.</p><p>Best,<br>Hüseyin Ajuz</p>'
+      'html',    '<p>Hi ' || _patient.first_name || ',</p><p>I wanted to follow up on your interest in our hair loss consultation programme. I''d love to help you understand what''s causing your hair loss and put together a personalised plan for you.</p><p>Feel free to reply to this email or reach out via WhatsApp to book a slot.</p>'
     );
 
     PERFORM net.http_post(
@@ -587,7 +587,7 @@ BEGIN
       'feature', 'lead_day7',
       'to',      _patient.email,
       'subject', 'Still thinking about your hair loss? Here''s what we can do',
-      'html',    '<p>Hi ' || _patient.first_name || ',</p><p>A week has passed since you first reached out. Hair loss can be tricky to address without the right guidance — that''s exactly what we specialise in.</p><p>If you have any questions before booking, just hit reply. I''m happy to chat.</p><p>Best,<br>Hüseyin Ajuz</p>'
+      'html',    '<p>Hi ' || _patient.first_name || ',</p><p>A week has passed since you first reached out. Hair loss can be tricky to address without the right guidance — that''s exactly what we specialise in.</p><p>If you have any questions before booking, just hit reply. I''m happy to chat.</p>'
     );
 
     PERFORM net.http_post(
@@ -658,7 +658,7 @@ BEGIN
       'feature', 'lead_day12',
       'to',      _patient.email,
       'subject', 'Last chance to book your consultation',
-      'html',    '<p>Hi ' || _patient.first_name || ',</p><p>This is my final follow-up. I don''t want to overwhelm your inbox — but I did want to make sure you hadn''t missed us.</p><p>If you''re still interested in understanding and tackling your hair loss, I''d love to help. Just reply and we''ll take it from there.</p><p>Best,<br>Hüseyin Ajuz</p>'
+      'html',    '<p>Hi ' || _patient.first_name || ',</p><p>This is my final follow-up. I don''t want to overwhelm your inbox — but I did want to make sure you hadn''t missed us.</p><p>If you''re still interested in understanding and tackling your hair loss, I''d love to help. Just reply and we''ll take it from there.</p>'
     );
 
     PERFORM net.http_post(
