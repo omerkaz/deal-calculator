@@ -171,6 +171,30 @@ create policy "Users can insert own settings"
 create policy "Users can update own settings"
   on practitioner_settings for update using (auth.uid() = user_id);
 
+-- ── Email send tracking log ──
+-- Records when each reminder/drip email was sent to a patient.
+-- Used by cron functions for at-least-once delivery (MAIL-02):
+--   NOT EXISTS (... WHERE sent_at >= state_changed_at) replaces BETWEEN windows.
+-- Design: tracking table (not per-feature columns) — scales to new features
+-- without schema changes and provides an audit trail.
+
+create table if not exists email_send_log (
+  id          uuid primary key default gen_random_uuid(),
+  patient_id  uuid not null references patients(id) on delete cascade,
+  feature     text not null,
+  sent_at     timestamptz not null default now()
+);
+
+create index if not exists idx_email_send_log_patient_feature
+  on email_send_log(patient_id, feature);
+
+alter table email_send_log enable row level security;
+
+create policy "Users can view email send log"
+  on email_send_log for select using (
+    patient_id in (select id from patients where created_by = auth.uid())
+  );
+
 -- ── state_changed_at migration ──
 ALTER TABLE patients ADD COLUMN IF NOT EXISTS state_changed_at TIMESTAMPTZ;
 UPDATE patients SET state_changed_at = updated_at WHERE state_changed_at IS NULL;
