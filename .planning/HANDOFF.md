@@ -1,7 +1,7 @@
 ---
-status: v1.2_phase_13_next
-last_updated: 2026-07-18
-next_action: Execute Phase 13 (Verified Sender Identity). Also pending from Hüseyin/user — Phase 15 answers (discount, copy flow, ManyChat overlap), Project assignment for 2 board cards, price-list strategy decision.
+status: v1.2_phase_16_next
+last_updated: 2026-07-19
+next_action: Discuss/plan Phase 16 (Email Design System — unblocked). Also pending from Hüseyin/user — Phase 15 answers (discount, copy flow, ManyChat overlap), Project assignment for 2 board cards, price-list strategy decision.
 ---
 
 # Session Handoff — Hüseyin Ajuz Patient CRM
@@ -9,17 +9,32 @@ next_action: Execute Phase 13 (Verified Sender Identity). Also pending from Hüs
 Boot order for a fresh session: read `CLAUDE.md` → this file → `.planning/STATE.md` → `.planning/ROADMAP.md`.
 
 <current_state>
-Milestone **v1.2 Deliverability & Landing Page Drip** — 2 of 4 phases shipped
-on 2026-07-18. Phase 12 (Domain & DNS) DONE: `huseyinacuz.com` verified in
-Resend. Phase 14 (Reliable Reminders) DONE: at-least-once delivery live in
-production. Phase 13 (Verified Sender Identity) UNBLOCKED and next — zero
-known blockers (domain verified + Vault API key ownership confirmed). Phase 15
-(Landing Page Drip) scoped, blocked on Hüseyin's input. MAIL-02 ✓ MAIL-04 ✓;
-MAIL-01 + MAIL-03 land in Phase 13. Repo pushed through `5320f6b`; Notion
-board fully mirrors planning state.
+Milestone **v1.2 Deliverability & Landing Page Drip** — 3 of 5 phases shipped
+(2026-07-19). Phase 12 (Domain & DNS) DONE. Phase 13 (Verified Sender
+Identity) DONE: send-email v3 deployed, `mrhus@huseyinacuz.com` sender,
+footer injection, 7/7 Gmail delivery human-verified. Phase 14 (Reliable
+Reminders) DONE. Phase 15 (Landing Page Drip) blocked on Hüseyin's input.
+Phase 16 (Email Design System) added and UNBLOCKED — next-eligible.
+MAIL-01 ✓ MAIL-02 ✓ MAIL-03 ✓ MAIL-04 ✓; MAIL-05 lands in Phase 16.
+Repo not yet pushed (3 commits ahead of origin).
 </current_state>
 
 <completed_work>
+**2026-07-19 session — Phase 13 execution (single worker agent + orchestrator):**
+
+- **Phase 13 EXECUTED + CLOSED** (plan `f2e75b1`; feat `75ee9bc`; docs
+  `ffc61df`, MAIL-01 ✓ MAIL-03 ✓). send-email Edge Function v3: sender
+  `"Hüseyin Ajuz" <mrhus@huseyinacuz.com>`, `reply_to`, HTML+text footer
+  injection at chokepoint (before `</body>` or appended). Removed inline
+  sign-offs from all 7 templates (4 in `src/lib/email.ts`, 6 in
+  `schema.sql`). Deployed v3 + applied 6 cron function updates to live DB.
+  Toggle-OFF regression: 7/7 `skipped:true`. Real-inbox: 7/7 sent to
+  `omerkazfd@gmail.com` (Gmail) — human confirmed all delivered, not spam.
+  Eligible-patient count verified 0 before any toggle flip (blast-safe).
+- **Phase 16 added** (Email Design System, MAIL-05): branded HTML wrapper,
+  design-token alignment, email-client compat, dark-mode. Unblocked now;
+  Phase 15 drip templates depend on it.
+
 **2026-07-18 session — parallel tmux orchestration (2 opus-4.6 agents +
 orchestrator):**
 
@@ -57,15 +72,15 @@ Document Hub wired, project skill `.pi/skills/ajuz-crm-board/`.
 </completed_work>
 
 <remaining_work>
-**Phase 13 (next, zero blockers):** send-email v3 — sender
-`"Hüseyin Ajuz" <mrhus@huseyinacuz.com>`, reply-to, consistent footer across
-7 templates, end-to-end real-inbox test per feature (headers SPF/DKIM pass,
-not spam), toggle-OFF regression. Completes MAIL-01 + MAIL-03. Deploy via
-Edge Function deploy; domain + key are ready.
+**Phase 16 (next, unblocked):** Email Design System (MAIL-05). Branded HTML
+wrapper template injected at the send-email chokepoint (extends v3 footer).
+Design-token alignment with CRM palette, email-client compat (Outlook
+table-based), dark-mode, mobile responsive. Discuss-phase 16 → plan → execute.
+Phase 15 drip templates should adopt this design.
 
-**Phase 15 (after 13):** blocked on Hüseyin's answers — Day-20 discount
-(amount/code), email copy approval flow, whether ManyChat leads get the drip.
-Then discuss-phase 15 → plan → execute.
+**Phase 15 (blocked):** Landing Page Drip — still awaiting Hüseyin's answers:
+Day-20 discount (amount/code), email copy approval flow, whether ManyChat
+leads get the drip. Then discuss-phase 15 → plan → execute.
 
 **Board follow-ups:**
 - 2 cards await Project assignment (user's "except 3" was ambiguous):
@@ -81,8 +96,9 @@ Then discuss-phase 15 → plan → execute.
   together with DRIP-01 webhook so redirect + lead capture don't conflict.
 
 **Housekeeping:** ESLint not wired; GitHub remote misnamed `deal-calculator`;
-gsd health warnings only for unplanned phase dirs 13/15 (expected);
-optional `_dmarc` TXT deferred to v1.3.
+Notion board needs MAIL-01/MAIL-03 → Done + MAIL-05 card created;
+optional `_dmarc` TXT deferred to v1.3; `src/lib/email.ts` welcome template
+text fix rides next frontend deploy.
 </remaining_work>
 
 <decisions_made>
@@ -98,6 +114,10 @@ optional `_dmarc` TXT deferred to v1.3.
   risk); MAIL-01 validated in Phase 13 (Phase 12 was groundwork)
 - Docs → Notion Document Hub; work items → kanban board (don't mix)
 - v1.3 candidates unchanged: CAL-01, DOC-01, MSG-01/SEED-001, WEB-01, DMARC
+- Footer injection at Edge Function chokepoint (not in 7 templates) —
+  guarantees all current + future emails get consistent branding (2026-07-19)
+- Phase 16 (Email Design System) positioned before Phase 15 — drip templates
+  adopt the design system rather than shipping unstyled then retrofitting
 </decisions_made>
 
 <operational_notes>

@@ -110,6 +110,37 @@ pg_cron infrastructure (AUTO-04)
 4. Per-step toggles in Settings; all OFF by default
 5. Day 20 email has distinct discount/urgency design
 
+### Phase 16: Email Design System
+
+**Goal:** Emails look professionally designed and on-brand — not bare
+paragraphs — while staying deliverability-safe across major clients.
+
+**Requirements:** MAIL-05
+
+**Dependencies:** Phase 13 (v3 chokepoint footer is the injection point)
+
+**Scope:**
+- Branded HTML wrapper template: header (name/wordmark), content slot, footer
+  — injected at the send-email chokepoint (extends the v3 footer pattern)
+- Design-token alignment with CRM design system (linen bg, cream surface,
+  teal accents, charcoal text) using email-safe approximations; font stacks
+  for email clients (DM Serif/Inter won’t load — define safe fallbacks)
+- Email-client compatibility: table-based layout for Outlook, dark-mode
+  meta/media queries, mobile responsiveness (max-width pattern)
+- Plain-text parity maintained (text footer already handled by v3)
+- Spam-safety: text/image ratio, no heavy images, keep SPF/DKIM-clean sending
+- Applies to existing 7 templates + sets pattern for Phase 15 drip templates
+
+**Positioning:** Unblocked now. Phase 15 drip templates (esp. DRIP-05
+“distinct discount/urgency design”) should adopt the Phase 16 design system.
+
+**Success criteria:**
+1. All 7 existing emails render with branded wrapper (header + styled footer)
+2. Renders correctly in Gmail, Apple Mail, Outlook (table-based fallback)
+3. Dark-mode doesn’t break readability
+4. SPF/DKIM still pass; spam score unchanged or improved
+5. Design tokens documented for Phase 15 drip template authors
+
 ## Requirement Traceability
 
 | Requirement | Phase | Status |
@@ -118,6 +149,7 @@ pg_cron infrastructure (AUTO-04)
 | MAIL-02 | 14 | Done |
 | MAIL-03 | 13 | Done |
 | MAIL-04 | 12 | Done |
+| MAIL-05 | 16 | Pending |
 | DRIP-01 | 15 | Pending |
 | DRIP-02 | 15 | Pending |
 | DRIP-03 | 15 | Pending |
@@ -127,7 +159,7 @@ pg_cron infrastructure (AUTO-04)
 ## Phase Numbering
 
 Phases 1–11 consumed by v1.0 (1–6) and v1.1 (7–11) under the old slice
-structure. v1.2 continues at 12–15.
+structure. v1.2 continues at 12–16.
 
 ## Context Loss Note
 
