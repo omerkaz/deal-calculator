@@ -1,7 +1,7 @@
 ---
 status: v1.2_phase_16_next
 last_updated: 2026-07-19
-next_action: Discuss/plan Phase 16 (Email Design System — unblocked). Also pending from Hüseyin/user — Phase 15 answers (discount, copy flow, ManyChat overlap), Project assignment for 2 board cards, price-list strategy decision.
+next_action: Discuss/plan Phase 16 (Email Design System — unblocked). Also pending from Hüseyin/user — Phase 15 answers (discount, copy flow, ManyChat overlap), price-versioning strategy decision (PRICE-01).
 ---
 
 # Session Handoff — Hüseyin Ajuz Patient CRM
@@ -82,21 +82,21 @@ Phase 15 drip templates should adopt this design.
 Day-20 discount (amount/code), email copy approval flow, whether ManyChat
 leads get the drip. Then discuss-phase 15 → plan → execute.
 
-**Board follow-ups:**
-- 2 cards await Project assignment (user's "except 3" was ambiguous):
-  "Country code will be mandatory" and "All clients mails should be
-  separated" — one is Landing Page, one is CRM; ask which.
-- "A new price list." card contains NEW tier prices — standard $297,
-  premium $497, vip $797 vs code's 197/297/497 (`PACKAGE_PRICES` in
-  `src/types/database.ts`). ⚠️ Payment status is computed at read time
-  (D008): naive constant bump flips historical fully-paid patients to
-  "partial". Needs price-versioning / price-at-sale strategy → candidate
-  requirement PRICE-01. Card copy also feeds WEB-01.
+**Board follow-ups (synced 2026-07-19, all 23 cards have Project):**
+- RESOLVED: "Country code will be mandatory" + "All clients mails should be
+  separated" → both Landing Page (user confirmed; changes already made on
+  the landing page externally). Useful DRIP-01 spec input: landing form now
+  has mandatory country code and per-client emails.
+- **PRICE-01 card created** (CRM, Not started): new tier prices standard
+  $297 / premium $497 / vip $797 are live on the landing page, but code
+  still has 197/297/497 (`PACKAGE_PRICES` in `src/types/database.ts`).
+  ⚠️ Payment status is computed at read time (D008): naive constant bump
+  flips historical fully-paid patients to "partial". Price-versioning /
+  price-at-sale strategy decision still PENDING — discuss before scheduling.
 - "Landing page's form should redirect to a survey" — needs spec; design
   together with DRIP-01 webhook so redirect + lead capture don't conflict.
 
 **Housekeeping:** ESLint not wired; GitHub remote misnamed `deal-calculator`;
-Notion board needs MAIL-01/MAIL-03 → Done + MAIL-05 card created;
 optional `_dmarc` TXT deferred to v1.3; `src/lib/email.ts` welcome template
 text fix rides next frontend deploy.
 </remaining_work>
