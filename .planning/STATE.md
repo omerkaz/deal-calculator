@@ -7,32 +7,32 @@ last_updated: "2026-07-18T00:00:00.000Z"
 last_activity: 2026-07-18
 progress:
   total_phases: 4
-  completed_phases: 0
-  total_plans: 2
-  completed_plans: 2
-  percent: 25
+  completed_phases: 2
+  total_plans: 3
+  completed_plans: 3
+  percent: 50
 ---
 
 # Project State
 
 **Last updated:** 2026-07-18
 **Current milestone:** v1.2 Deliverability & Landing Page Drip (in progress)
-**Current phase:** Phase 14 executed; Phase 12 in progress (browser agent)
+**Current phase:** Phase 13 next (unblocked by Phase 12 completion)
 
 ## Current Position
 
-Phase: 14 — Reliable Reminders (EXECUTED — migration applied to live DB)
-Plans: 14-01 ✅, 14-02 ✅
-Status: All 6 cron functions rewritten for at-least-once delivery; email_send_log table live
-Last activity: 2026-07-18 — Phase 14 executed, migration deployed
-Next code-ready work: Phase 13 (Verified Sender Identity, after Phase 12 DNS completes)
+Phase: 12 — Domain & DNS Verification (DONE); Phase 14 — Reliable Reminders (DONE)
+Plans: 12-01 ✅, 14-01 ✅, 14-02 ✅
+Status: Domain verified in Resend, API key valid, all cron functions rewritten
+Last activity: 2026-07-18 — Phase 12 closed out, Phase 14 executed
+Next code-ready work: Phase 13 (Verified Sender Identity — now unblocked)
 
 ## Phase Status
 
 | Phase | Name | Status |
 |-------|------|--------|
-| 12 | Domain & DNS Verification | 🔄 In progress (browser agent) |
-| 13 | Verified Sender Identity | ⏳ Pending (depends on Phase 12) |
+| 12 | Domain & DNS Verification | ✅ Done (domain verified, API key valid) |
+| 13 | Verified Sender Identity | 🔜 Unblocked (next) |
 | 14 | Reliable Reminders | ✅ Executed (migration applied to live DB) |
 | 15 | Landing Page Drip Sequence | ⏳ Pending (depends on Phase 13) |
 

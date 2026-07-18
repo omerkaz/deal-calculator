@@ -1,7 +1,7 @@
 ---
-status: v1.2_phase_12_in_progress
+status: v1.2_phase_13_next
 last_updated: 2026-07-18
-next_action: Phase 12 DNS entry via browser agent; Phase 14 planned (execute next); Phase 15 (DRIP) pending Phase 13
+next_action: Execute Phase 13 (Verified Sender Identity) — sender switch + inbox tests; Phase 15 (DRIP) pending after Phase 13
 ---
 
 # Session Handoff — Hüseyin Ajuz Patient CRM
@@ -9,14 +9,12 @@ next_action: Phase 12 DNS entry via browser agent; Phase 14 planned (execute nex
 Boot order for a fresh session: read `CLAUDE.md` → this file → `.planning/STATE.md` → `.planning/ROADMAP.md`.
 
 <current_state>
-Milestone **v1.2 Deliverability & Landing Page Drip** in progress (scoped
-2026-07-11, DRIP added 2026-07-15).
-4 phases: 12 (Domain & DNS Verification — IN PROGRESS via browser agent),
-13 (Verified Sender Identity), 14 (Reliable Reminders — PLANNED, PLAN.md
-ready), 15 (Landing Page Drip Sequence — PENDING, depends on Phase 13).
-Requirements MAIL-01..04 + DRIP-01..05 committed.
-Phase 12 DNS entry executing via parallel browser agent (GoDaddy tab).
-Phase 14 is next code-ready work (DNS-independent).
+Milestone **v1.2 Deliverability & Landing Page Drip** in progress.
+4 phases: 12 (DONE — domain verified), 13 (Verified Sender Identity —
+UNBLOCKED, next), 14 (Reliable Reminders — DONE, migration live),
+15 (Landing Page Drip Sequence — PENDING, depends on Phase 13).
+MAIL-04 done, MAIL-02 done. MAIL-01 + MAIL-03 pending (Phase 13).
+Resend API key verified: `huseyinacuz.com` listed, status=verified.
 </current_state>
 
 <completed_work>

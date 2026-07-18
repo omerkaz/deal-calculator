@@ -46,7 +46,7 @@
       tracked per patient/feature; at-least-once delivery replaces 24h BETWEEN windows (D017 revisit)
 - [ ] **MAIL-03**: Patient-facing emails have a professional identity — from-name
       "Hüseyin Ajuz", reply-to `mrhus@huseyinacuz.com`, consistent footer across all 7 templates
-- [ ] **MAIL-04**: Hüseyin's regular Google Workspace mail is SPF-protected —
+- [x] **MAIL-04**: Hüseyin's regular Google Workspace mail is SPF-protected —
       `v=spf1 include:_spf.google.com ~all` TXT added to `huseyinacuz.com`
       (domain currently has NO SPF record)
 
