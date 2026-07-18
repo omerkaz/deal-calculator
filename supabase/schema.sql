@@ -214,17 +214,17 @@ CREATE INDEX IF NOT EXISTS idx_patients_state_changed ON patients(lifecycle_stat
 --   3. pg_cron and pg_net extensions must be enabled for the project
 --      (Supabase Dashboard > Database > Extensions). The guards below are idempotent.
 --
--- Reminder windows are 24h wide (BETWEEN day N+1 ago AND day N ago) so each
--- patient receives at most one reminder per feature. Known limitation: if the
--- daily cron run is missed entirely, patients age out of the window and the
--- reminder is skipped (acceptable at current volume; revisit with a
--- last_reminder_sent_at column if volume grows).
+-- At-least-once delivery (MAIL-02): each function checks NOT EXISTS against
+-- email_send_log so missed cron runs catch up on the next execution.
+-- Deduplication: sent_at >= COALESCE(state_changed_at, created_at) ensures
+-- re-engagement (cold → lead) resets tracking naturally.
 
 CREATE EXTENSION IF NOT EXISTS pg_cron;
 CREATE EXTENSION IF NOT EXISTS pg_net;
 
--- Helper: send blood-test reminder emails
--- Fires once for patients in 'awaiting_blood_test' 14 days after entering the state.
+-- Helper: send blood-test reminder emails (at-least-once)
+-- Fires for patients in 'awaiting_blood_test' ≥14 days after entering the state,
+-- if no email_send_log record exists for this lifecycle run.
 CREATE OR REPLACE FUNCTION send_blood_test_reminders()
 RETURNS void
 LANGUAGE plpgsql
@@ -262,9 +262,14 @@ BEGIN
     SELECT id, first_name, email
       FROM patients
      WHERE lifecycle_state = 'awaiting_blood_test'
-       AND COALESCE(state_changed_at, created_at)
-           BETWEEN now() - INTERVAL '15 days' AND now() - INTERVAL '14 days'
+       AND COALESCE(state_changed_at, created_at) <= now() - INTERVAL '14 days'
        AND email IS NOT NULL
+       AND NOT EXISTS (
+         SELECT 1 FROM email_send_log esl
+          WHERE esl.patient_id = patients.id
+            AND esl.feature = 'blood_test_reminder'
+            AND esl.sent_at >= COALESCE(patients.state_changed_at, patients.created_at)
+       )
   LOOP
     _body := jsonb_build_object(
       'feature', 'blood_test_reminder',
@@ -281,12 +286,16 @@ BEGIN
         'Authorization', 'Bearer ' || _secret
       )
     );
+
+    INSERT INTO email_send_log (patient_id, feature)
+    VALUES (_patient.id, 'blood_test_reminder');
   END LOOP;
 END;
 $$;
 
--- Helper: send week-6 check-in reminder emails
--- Fires once for patients in 'active_treatment' 42 days after entering the state.
+-- Helper: send week-6 check-in reminder emails (at-least-once)
+-- Fires for patients in 'active_treatment' ≥42 days after entering the state,
+-- if no email_send_log record exists for this lifecycle run.
 CREATE OR REPLACE FUNCTION send_week6_checkin_reminders()
 RETURNS void
 LANGUAGE plpgsql
@@ -324,9 +333,14 @@ BEGIN
     SELECT id, first_name, email
       FROM patients
      WHERE lifecycle_state = 'active_treatment'
-       AND COALESCE(state_changed_at, created_at)
-           BETWEEN now() - INTERVAL '43 days' AND now() - INTERVAL '42 days'
+       AND COALESCE(state_changed_at, created_at) <= now() - INTERVAL '42 days'
        AND email IS NOT NULL
+       AND NOT EXISTS (
+         SELECT 1 FROM email_send_log esl
+          WHERE esl.patient_id = patients.id
+            AND esl.feature = 'week_6_checkin'
+            AND esl.sent_at >= COALESCE(patients.state_changed_at, patients.created_at)
+       )
   LOOP
     _body := jsonb_build_object(
       'feature', 'week_6_checkin',
@@ -343,12 +357,16 @@ BEGIN
         'Authorization', 'Bearer ' || _secret
       )
     );
+
+    INSERT INTO email_send_log (patient_id, feature)
+    VALUES (_patient.id, 'week_6_checkin');
   END LOOP;
 END;
 $$;
 
--- Helper: send end-review reminder emails
--- Fires once for patients in 'week_6_checkin' 7 days after entering the state.
+-- Helper: send end-review reminder emails (at-least-once)
+-- Fires for patients in 'week_6_checkin' ≥7 days after entering the state,
+-- if no email_send_log record exists for this lifecycle run.
 CREATE OR REPLACE FUNCTION send_end_review_reminders()
 RETURNS void
 LANGUAGE plpgsql
@@ -386,9 +404,14 @@ BEGIN
     SELECT id, first_name, email
       FROM patients
      WHERE lifecycle_state = 'week_6_checkin'
-       AND COALESCE(state_changed_at, created_at)
-           BETWEEN now() - INTERVAL '8 days' AND now() - INTERVAL '7 days'
+       AND COALESCE(state_changed_at, created_at) <= now() - INTERVAL '7 days'
        AND email IS NOT NULL
+       AND NOT EXISTS (
+         SELECT 1 FROM email_send_log esl
+          WHERE esl.patient_id = patients.id
+            AND esl.feature = 'end_review'
+            AND esl.sent_at >= COALESCE(patients.state_changed_at, patients.created_at)
+       )
   LOOP
     _body := jsonb_build_object(
       'feature', 'end_review',
@@ -405,6 +428,9 @@ BEGIN
         'Authorization', 'Bearer ' || _secret
       )
     );
+
+    INSERT INTO email_send_log (patient_id, feature)
+    VALUES (_patient.id, 'end_review');
   END LOOP;
 END;
 $$;
