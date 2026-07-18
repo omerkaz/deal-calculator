@@ -3,36 +3,36 @@ gsd_state_version: 1.0
 milestone: v1.2
 milestone_name: Deliverability & Landing Page Drip
 status: in_progress
-last_updated: "2026-07-18T00:00:00.000Z"
-last_activity: 2026-07-18
+last_updated: "2026-07-19T00:00:00.000Z"
+last_activity: 2026-07-19
 progress:
   total_phases: 4
-  completed_phases: 2
-  total_plans: 3
-  completed_plans: 3
-  percent: 50
+  completed_phases: 3
+  total_plans: 4
+  completed_plans: 4
+  percent: 75
 ---
 
 # Project State
 
-**Last updated:** 2026-07-18
+**Last updated:** 2026-07-19
 **Current milestone:** v1.2 Deliverability & Landing Page Drip (in progress)
-**Current phase:** Phase 13 next (unblocked by Phase 12 completion)
+**Current phase:** Phase 13 Done (pending human inbox verification); Phase 15 next
 
 ## Current Position
 
-Phase: 12 — Domain & DNS Verification (DONE); Phase 14 — Reliable Reminders (DONE)
-Plans: 12-01 ✅, 14-01 ✅, 14-02 ✅
-Status: Domain verified in Resend, API key valid, all cron functions rewritten
-Last activity: 2026-07-18 — Phase 12 closed out, Phase 14 executed
-Next code-ready work: Phase 13 (Verified Sender Identity — now unblocked)
+Phase: 13 — Verified Sender Identity (DONE — pending inbox verification)
+Plans: 12-01 ✅, 13-01 ✅, 14-01 ✅, 14-02 ✅
+Status: send-email v3 deployed, all templates updated, 7/7 sent to real inbox
+Last activity: 2026-07-19 — Phase 13 executed (MAIL-01 + MAIL-03)
+Next code-ready work: Phase 15 (Landing Page Drip — blocked on Hüseyin's input)
 
 ## Phase Status
 
 | Phase | Name | Status |
 |-------|------|--------|
 | 12 | Domain & DNS Verification | ✅ Done (domain verified, API key valid) |
-| 13 | Verified Sender Identity | 🔜 Unblocked (next) |
+| 13 | Verified Sender Identity | ✅ Done (deployed, 7/7 sent, pending inbox check) |
 | 14 | Reliable Reminders | ✅ Executed (migration applied to live DB) |
 | 15 | Landing Page Drip Sequence | ⏳ Pending (depends on Phase 13) |
 

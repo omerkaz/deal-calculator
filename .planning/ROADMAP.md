@@ -114,9 +114,9 @@ pg_cron infrastructure (AUTO-04)
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| MAIL-01 | 13 | Pending |
+| MAIL-01 | 13 | Done |
 | MAIL-02 | 14 | Done |
-| MAIL-03 | 13 | Pending |
+| MAIL-03 | 13 | Done |
 | MAIL-04 | 12 | Done |
 | DRIP-01 | 15 | Pending |
 | DRIP-02 | 15 | Pending |
