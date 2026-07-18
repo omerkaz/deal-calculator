@@ -1,7 +1,7 @@
 ---
 status: v1.2_phase_12_in_progress
-last_updated: 2026-07-11
-next_action: enter DNS records in GoDaddy (waiting on Hüseyin's credentials); code-only work (Phase 14 / Phase 13 prep) can start in parallel
+last_updated: 2026-07-18
+next_action: Phase 12 DNS entry via browser agent; Phase 14 planned (execute next); Phase 15 (DRIP) pending Phase 13
 ---
 
 # Session Handoff — Hüseyin Ajuz Patient CRM
@@ -9,12 +9,14 @@ next_action: enter DNS records in GoDaddy (waiting on Hüseyin's credentials); c
 Boot order for a fresh session: read `CLAUDE.md` → this file → `.planning/STATE.md` → `.planning/ROADMAP.md`.
 
 <current_state>
-Milestone **v1.2 Deliverability** scoped and roadmap approved (2026-07-11).
-3 phases: 12 (Domain & DNS Verification — IN PROGRESS), 13 (Verified Sender
-Identity), 14 (Reliable Reminders). Requirements MAIL-01..04 committed.
-Phase 12 is mid-execution via dev-browser; blocked on GoDaddy credentials
-from Hüseyin. Phase 14 and Phase 13 code prep are DNS-independent and can
-proceed anytime.
+Milestone **v1.2 Deliverability & Landing Page Drip** in progress (scoped
+2026-07-11, DRIP added 2026-07-15).
+4 phases: 12 (Domain & DNS Verification — IN PROGRESS via browser agent),
+13 (Verified Sender Identity), 14 (Reliable Reminders — PLANNED, PLAN.md
+ready), 15 (Landing Page Drip Sequence — PENDING, depends on Phase 13).
+Requirements MAIL-01..04 + DRIP-01..05 committed.
+Phase 12 DNS entry executing via parallel browser agent (GoDaddy tab).
+Phase 14 is next code-ready work (DNS-independent).
 </current_state>
 
 <completed_work>

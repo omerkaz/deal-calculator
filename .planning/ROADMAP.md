@@ -1,7 +1,7 @@
 # Roadmap: Hüseyin Ajuz Patient CRM
 
 **Migrated:** 2026-07-06 from GSD-3 milestone structure (M001/M002 → v1.0/v1.1)
-**Current milestone:** v1.2 Deliverability (scoped 2026-07-11)
+**Current milestone:** v1.2 Deliverability & Landing Page Drip (scoped 2026-07-11, DRIP added 2026-07-15)
 
 ## Milestones
 
@@ -13,7 +13,7 @@
   follow-up. Post-ship hardening pass (2026-07-06) fixed 6 broken cron
   functions and verified the email chain end-to-end in production.
   Archived: `milestones/v1.1-automation-polish.md`
-- 🔄 **v1.2 — Deliverability** — IN PLANNING. Phases 12–14 below.
+- 🔄 **v1.2 — Deliverability & Landing Page Drip** — IN PROGRESS. Phases 12–15 below.
 - 💤 **v1.3 — Patient Communication & Scheduling** (candidates: CAL-01, DOC-01,
   MSG-01/SEED-001, WEB-01, DMARC ride-along)
 
@@ -78,6 +78,38 @@ replaces the fragile 24h BETWEEN windows (D017 revisit).
 2. No duplicate reminders on normal consecutive runs
 3. `schema.sql` matches live DB after migration
 
+### Phase 15: Landing Page Drip Sequence
+
+**Goal:** Landing page form submissions automatically enter the CRM as leads
+and receive a 4-step email drip (Day 3 / 7 / 11 / 20) with a discount offer
+on the final step — stopping when the lead advances past `lead` state.
+
+**Requirements:** DRIP-01, DRIP-02, DRIP-03, DRIP-04, DRIP-05
+
+**Dependencies:** Phase 13 (MAIL-01 — can't email from sandbox), existing
+pg_cron infrastructure (AUTO-04)
+
+**Scope:**
+- Edge Function: Netlify form webhook → patient upsert with `source: 'landing_page'`
+  (idempotent by email, analogous to manychat-webhook)
+- 4 email templates: Day 3, Day 7, Day 11, Day 20 (discount/urgency CTA)
+- pg_cron function(s): timing from `created_at`, skip if `lifecycle_state != 'lead'`
+- Schema: `source` column on patients (or equivalent), `drip_day*_enabled`
+  toggles on `practitioner_settings`
+- Settings page: 4 new toggles for drip steps (all OFF by default)
+
+**Open questions (need Hüseyin's input):**
+- Day 20 discount details (percentage, fixed amount, or promo code)
+- Email copy/tone for each step — draft for approval?
+- Should ManyChat leads also get this drip, or landing page only?
+
+**Success criteria:**
+1. Netlify form → Edge Function → patient created with `source: 'landing_page'`
+2. Each drip step fires on schedule for `lead`-state landing page patients
+3. Drip stops when lead transitions to `contacted` or later
+4. Per-step toggles in Settings; all OFF by default
+5. Day 20 email has distinct discount/urgency design
+
 ## Requirement Traceability
 
 | Requirement | Phase | Status |
@@ -85,12 +117,17 @@ replaces the fragile 24h BETWEEN windows (D017 revisit).
 | MAIL-01 | 13 | Pending |
 | MAIL-02 | 14 | Pending |
 | MAIL-03 | 13 | Pending |
-| MAIL-04 | 12 | Pending |
+| MAIL-04 | 12 | In Progress |
+| DRIP-01 | 15 | Pending |
+| DRIP-02 | 15 | Pending |
+| DRIP-03 | 15 | Pending |
+| DRIP-04 | 15 | Pending |
+| DRIP-05 | 15 | Pending |
 
 ## Phase Numbering
 
 Phases 1–11 consumed by v1.0 (1–6) and v1.1 (7–11) under the old slice
-structure. v1.2 continues at 12–14.
+structure. v1.2 continues at 12–15.
 
 ## Context Loss Note
 

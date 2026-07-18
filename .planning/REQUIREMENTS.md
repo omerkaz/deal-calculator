@@ -59,6 +59,52 @@
 | MAIL-03 | Phase 13 |
 | MAIL-04 | Phase 12 |
 
+## v1.2 Requirements — Landing Page Drip Sequence (scoped 2026-07-15)
+
+### Landing Page Lead Funnel (DRIP)
+
+- [ ] **DRIP-01**: Landing page form submissions create a lead in the CRM —
+      Netlify form webhook → Supabase Edge Function → patient upsert with
+      `lifecycle_state: 'lead'`, `source: 'landing_page'`. Idempotent by email.
+- [ ] **DRIP-02**: 4-step automated follow-up drip for landing page leads —
+      Day 3 / Day 7 / Day 11 / Day 20. Each step is a separate email template.
+      Timing measured from `created_at` of the lead record.
+- [ ] **DRIP-03**: Day 20 email includes a preset discount offer —
+      discount amount/code TBD by Hüseyin; template must stand out from
+      earlier follow-ups (urgency framing, clear CTA).
+- [ ] **DRIP-04**: Drip sequence stops when lead transitions out of `lead` state —
+      if Hüseyin moves the patient to `contacted` or any later state,
+      no further drip emails fire. Respects existing AUTO-05 cold logic.
+- [ ] **DRIP-05**: Per-step opt-in toggles in Settings page —
+      `drip_day3_enabled`, `drip_day7_enabled`, `drip_day11_enabled`,
+      `drip_day20_enabled` columns on `practitioner_settings`. All OFF by default.
+
+### Dependencies
+
+| Requirement | Depends on |
+|-------------|------------|
+| DRIP-01 | MAIL-01 (custom domain — can't email real leads from sandbox) |
+| DRIP-02 | DRIP-01, pg_cron infrastructure (already exists from AUTO-04) |
+| DRIP-03 | DRIP-02, discount details from Hüseyin |
+| DRIP-04 | DRIP-02, existing state machine |
+| DRIP-05 | DRIP-02, existing settings page |
+
+### Traceability
+
+| Requirement | Phase |
+|-------------|-------|
+| DRIP-01 | Phase 15 |
+| DRIP-02 | Phase 15 |
+| DRIP-03 | Phase 15 |
+| DRIP-04 | Phase 15 |
+| DRIP-05 | Phase 15 |
+
+### Open Questions (need Hüseyin's input)
+
+- What discount to offer on Day 20? (percentage, fixed amount, or promo code)
+- Email copy/tone for each of the 4 steps — or should we draft and he approves?
+- Should leads who came via ManyChat also get this drip, or only landing page leads?
+
 ## Future Requirements (deferred to v1.3+)
 
 - **CAL-01**: Appointment scheduling integration (Google Calendar or Calendly) —

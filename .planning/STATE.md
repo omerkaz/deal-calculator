@@ -1,30 +1,39 @@
 ---
 gsd_state_version: 1.0
 milestone: v1.2
-milestone_name: Deliverability
-status: planning
-last_updated: "2026-07-11T16:10:04.922Z"
-last_activity: 2026-07-11
+milestone_name: Deliverability & Landing Page Drip
+status: in_progress
+last_updated: "2026-07-18T00:00:00.000Z"
+last_activity: 2026-07-18
 progress:
-  total_phases: 3
+  total_phases: 4
   completed_phases: 0
-  total_plans: 0
+  total_plans: 1
   completed_plans: 0
   percent: 0
 ---
 
 # Project State
 
-**Last updated:** 2026-07-11
-**Current milestone:** v1.2 Deliverability (planning)
-**Current phase:** None active — defining requirements
+**Last updated:** 2026-07-18
+**Current milestone:** v1.2 Deliverability & Landing Page Drip (in progress)
+**Current phase:** Phase 12 executing (parallel browser agent); Phase 14 planned
 
 ## Current Position
 
-Phase: 12 — Domain & DNS Verification (not started)
-Plan: —
-Status: Roadmap approved (phases 12–14) — ready to plan phase 12
-Last activity: 2026-07-11 — v1.2 roadmap approved
+Phase: 12 — Domain & DNS Verification (in progress — parallel browser agent entering DNS in GoDaddy)
+Plan: Phase 14 PLAN.md created (Reliable Reminders)
+Status: DRIP-01..05 integrated into roadmap (Phase 15); Phase 14 planning complete
+Last activity: 2026-07-18 — DRIP scope reconciled, Phase 14 planned
+
+## Phase Status
+
+| Phase | Name | Status |
+|-------|------|--------|
+| 12 | Domain & DNS Verification | 🔄 In progress (browser agent) |
+| 13 | Verified Sender Identity | ⏳ Pending (depends on Phase 12) |
+| 14 | Reliable Reminders | 📋 Planned (PLAN.md ready, DNS-independent) |
+| 15 | Landing Page Drip Sequence | ⏳ Pending (depends on Phase 13) |
 
 ## Verified Production State (2026-07-06)
 
