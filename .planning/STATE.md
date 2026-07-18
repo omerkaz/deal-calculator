@@ -9,23 +9,23 @@ progress:
   total_phases: 4
   completed_phases: 0
   total_plans: 2
-  completed_plans: 0
-  percent: 0
+  completed_plans: 2
+  percent: 25
 ---
 
 # Project State
 
 **Last updated:** 2026-07-18
 **Current milestone:** v1.2 Deliverability & Landing Page Drip (in progress)
-**Current phase:** Phase 12 executing (parallel browser agent); Phase 14 planned
+**Current phase:** Phase 14 executed; Phase 12 in progress (browser agent)
 
 ## Current Position
 
-Phase: 12 — Domain & DNS Verification (in progress — parallel browser agent entering DNS in GoDaddy)
-Plans: 14-01-PLAN.md (Schema — email_send_log table), 14-02-PLAN.md (Rewrite cron functions)
-Status: DRIP-01..05 integrated into roadmap (Phase 15); Phase 14 fully planned (2 plans, 2 waves)
-Last activity: 2026-07-18 — DRIP scope reconciled, Phase 14 planned
-Next code-ready work: Execute Phase 14 (DNS-independent) or Phase 13 (after Phase 12 completes)
+Phase: 14 — Reliable Reminders (EXECUTED — migration applied to live DB)
+Plans: 14-01 ✅, 14-02 ✅
+Status: All 6 cron functions rewritten for at-least-once delivery; email_send_log table live
+Last activity: 2026-07-18 — Phase 14 executed, migration deployed
+Next code-ready work: Phase 13 (Verified Sender Identity, after Phase 12 DNS completes)
 
 ## Phase Status
 
@@ -33,7 +33,7 @@ Next code-ready work: Execute Phase 14 (DNS-independent) or Phase 13 (after Phas
 |-------|------|--------|
 | 12 | Domain & DNS Verification | 🔄 In progress (browser agent) |
 | 13 | Verified Sender Identity | ⏳ Pending (depends on Phase 12) |
-| 14 | Reliable Reminders | 📋 Planned (2 plans ready, DNS-independent) |
+| 14 | Reliable Reminders | ✅ Executed (migration applied to live DB) |
 | 15 | Landing Page Drip Sequence | ⏳ Pending (depends on Phase 13) |
 
 ## Verified Production State (2026-07-06)
