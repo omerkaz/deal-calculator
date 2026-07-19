@@ -5,15 +5,17 @@ import { Button, Card, Input, Select } from "@/components/ui";
 import { useAuth } from "@/context/auth";
 import { createPatient, getPatient, updatePatient } from "@/lib/patients";
 import { sendWelcomeEmail } from "@/lib/email";
+import { getSettings } from "@/lib/settings";
 import { COUNTRY_CODES, isValidPhone } from "@/lib/phone";
-import { LANGUAGES, PACKAGE_TYPES } from "@/types/database";
-import type { LanguageCode, PackageType } from "@/types/database";
+import { getPackagePrice, LANGUAGES, PACKAGE_TYPES } from "@/types/database";
+import type { LanguageCode, PackageType, PractitionerSettings } from "@/types/database";
 
 interface FormErrors {
   firstName?: string;
   lastName?: string;
   email?: string;
   phone?: string;
+  agreedPrice?: string;
   submit?: string;
 }
 
@@ -29,15 +31,53 @@ export default function PatientFormPage() {
   const [email, setEmail] = useState("");
   const [phoneCountryCode, setPhoneCountryCode] = useState("+90");
   const [phone, setPhone] = useState("");
-
   const [language, setLanguage] = useState<LanguageCode>("tr");
   const [packageType, setPackageType] = useState<PackageType | "">("standard");
+  // agreed_price — string state for input (A4), shown when package selected
+  const [agreedPriceStr, setAgreedPriceStr] = useState("");
+  // Track original package (for detecting change in edit mode)
+  const [originalPackage, setOriginalPackage] = useState<PackageType | null>(null);
+
+  // ── Settings state (A2: need prices for snapshot) ──
+  const [settings, setSettings] = useState<Pick<PractitionerSettings, "price_standard" | "price_premium" | "price_vip"> | null>(null);
+  const [settingsLoading, setSettingsLoading] = useState(true);
 
   // ── UI state ──
   const [loading, setLoading] = useState(isEdit);
   const [submitting, setSubmitting] = useState(false);
   const [errors, setErrors] = useState<FormErrors>({});
   const [fetchError, setFetchError] = useState<string | null>(null);
+
+  // ── Load settings on mount ──
+  useEffect(() => {
+    if (!user) return;
+    setSettingsLoading(true);
+    getSettings(user.id).then(({ data }) => {
+      if (data) {
+        setSettings({
+          price_standard: data.price_standard,
+          price_premium: data.price_premium,
+          price_vip: data.price_vip,
+        });
+      }
+      setSettingsLoading(false);
+    });
+  }, [user]);
+
+  // ── Auto-fill agreed price when package changes ──
+  function handlePackageChange(newPkg: PackageType | "") {
+    setPackageType(newPkg);
+    if (!newPkg) {
+      // Package cleared → agreed_price must also clear (A1)
+      setAgreedPriceStr("");
+    } else if (settings) {
+      // Pre-fill from current settings price (editable for custom deals)
+      // In edit mode: only re-snapshot if package actually changed
+      if (!isEdit || newPkg !== originalPackage) {
+        setAgreedPriceStr(String(getPackagePrice(settings, newPkg)));
+      }
+    }
+  }
 
   // ── Load existing patient for edit mode ──
   const loadPatient = useCallback(async () => {
@@ -62,9 +102,10 @@ export default function PatientFormPage() {
         : "+90",
     );
     setPhone(data.phone_number);
-
     setLanguage(data.language);
     setPackageType(data.package_type ?? "");
+    setOriginalPackage(data.package_type ?? null);
+    setAgreedPriceStr(data.agreed_price != null ? String(data.agreed_price) : "");
     setLoading(false);
   }, [id]);
 
@@ -90,6 +131,17 @@ export default function PatientFormPage() {
     if (phone.trim() && !isValidPhone(phoneCountryCode, phone)) {
       next.phone = "Phone number must be 6–15 digits.";
     }
+    // agreed_price validation when package is selected
+    if (packageType) {
+      if (!agreedPriceStr.trim()) {
+        next.agreedPrice = "Agreed price is required when a package is selected.";
+      } else {
+        const n = Number(agreedPriceStr);
+        if (isNaN(n) || n <= 0 || !isFinite(n)) {
+          next.agreedPrice = "Enter a valid positive price.";
+        }
+      }
+    }
 
     return next;
   }
@@ -107,6 +159,23 @@ export default function PatientFormPage() {
     setErrors({});
     setSubmitting(true);
 
+    // A2: Fresh settings fetch at submit time to avoid stale-tab race
+    let freshPrice: number | null = null;
+    const selectedPkg = (packageType || null) as PackageType | null;
+
+    if (selectedPkg) {
+      const { data: freshSettings } = await getSettings(user?.id ?? "");
+      if (!freshSettings) {
+        setErrors({ submit: "Could not verify current prices. Please try again." });
+        setSubmitting(false);
+        return;
+      }
+      // Use the user-edited price (allows custom deals), but default
+      // from fresh settings if the package just changed
+      const editedPrice = Number(agreedPriceStr);
+      freshPrice = editedPrice > 0 ? editedPrice : getPackagePrice(freshSettings, selectedPkg);
+    }
+
     const payload = {
       first_name: firstName.trim(),
       last_name: lastName.trim(),
@@ -114,7 +183,9 @@ export default function PatientFormPage() {
       phone_country_code: phoneCountryCode,
       phone_number: phone.trim(),
       language,
-      package_type: (packageType || null) as PackageType | null,
+      package_type: selectedPkg,
+      // A1: package NULL → agreed_price NULL; package set → snapshot price
+      agreed_price: selectedPkg ? freshPrice : null,
     };
 
     if (isEdit && id) {
@@ -150,11 +221,11 @@ export default function PatientFormPage() {
   }
 
   // ── Loading / Error states ──
-  if (loading) {
+  if (loading || settingsLoading) {
     return (
       <div className="flex items-center justify-center py-20">
         <Loader2 className="h-6 w-6 animate-spin text-teal" />
-        <span className="ml-3 text-text-secondary">Loading patient…</span>
+        <span className="ml-3 text-text-secondary">Loading…</span>
       </div>
     );
   }
@@ -176,6 +247,9 @@ export default function PatientFormPage() {
     );
   }
 
+  // A2: disable form if settings failed to load
+  const settingsMissing = !settings;
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -191,6 +265,12 @@ export default function PatientFormPage() {
           {isEdit ? "Edit Patient" : "New Patient"}
         </h1>
       </div>
+
+      {settingsMissing && (
+        <div className="rounded-lg bg-coral/10 border border-coral/30 px-4 py-3 text-sm text-coral">
+          Could not load package prices. Package assignment is disabled until settings load successfully.
+        </div>
+      )}
 
       {/* Form */}
       <Card hover={false}>
@@ -270,11 +350,12 @@ export default function PatientFormPage() {
               ))}
             </Select>
 
-            {/* Package Type */}
+            {/* Package Type — disabled if settings unavailable (A2) */}
             <Select
               label="Package Type"
               value={packageType}
-              onChange={(e) => setPackageType(e.target.value as PackageType | "")}
+              onChange={(e) => handlePackageChange(e.target.value as PackageType | "")}
+              disabled={settingsMissing}
             >
               <option value="">None</option>
               {PACKAGE_TYPES.map((p) => (
@@ -283,6 +364,25 @@ export default function PatientFormPage() {
                 </option>
               ))}
             </Select>
+
+            {/* Agreed Price — shown only when package selected */}
+            {packageType && (
+              <div>
+                <Input
+                  label="Agreed Price ($)"
+                  type="number"
+                  min="1"
+                  step="0.01"
+                  value={agreedPriceStr}
+                  onChange={(e) => setAgreedPriceStr(e.target.value)}
+                  error={errors.agreedPrice}
+                  placeholder="0.00"
+                />
+                <p className="text-xs text-text-muted mt-1">
+                  Auto-filled from current price. Edit for custom deals.
+                </p>
+              </div>
+            )}
           </div>
 
           {/* Actions */}
@@ -290,7 +390,7 @@ export default function PatientFormPage() {
             <Button
               type="submit"
               loading={submitting}
-              disabled={submitting}
+              disabled={submitting || settingsMissing}
             >
               <Save className="h-4 w-4" />
               {isEdit ? "Save Changes" : "Create Patient"}
