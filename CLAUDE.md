@@ -22,7 +22,10 @@ Single-user patient management CRM for a trichologist (hair loss consultant) who
 | Edge Functions | Deno runtime | — | `fetch()` only — no npm SDK imports |
 | Tests | node:test | built-in | `--experimental-strip-types` for .ts files |
 
-**No ESLint configured yet** — wiring it is part of M002/S01.
+**ESLint wired (2026-07-19):** flat config (`eslint.config.js`) with
+typescript-eslint + react-hooks + react-refresh. Run `npm run lint`.
+Two benign react-refresh warnings (Badge variants, useAuth co-export)
+are accepted — don't restructure for HMR purity.
 
 ---
 

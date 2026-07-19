@@ -104,9 +104,9 @@ package/selected_package, subject, notes/booking_details, honeypot
 bot-field). Netlify continuous deploy LIVE (linked by user 2026-07-19,
 verified: 200, byte-identical, booking form processed — submissions
 intact). All landing edits now go repo → push main → auto-deploy; no env
-vars needed (static, Netlify Forms zero-config, GA ID public). Known live
-bug: transformation-1/2/3.jpg + your-photo.jpg 404
-(never uploaded). Board card: "Chore: Landing page repo + Netlify git
+vars needed (static, Netlify Forms zero-config, GA ID public). CORRECTION
+2026-07-19: transformation-*.jpg / your-photo.jpg refs are commented-out
+author placeholders; real images are inlined base64 — nothing broken. Board card: "Chore: Landing page repo + Netlify git
 wiring" (In development).
 
 **Board follow-ups (synced 2026-07-19, all 23 cards have Project):**
