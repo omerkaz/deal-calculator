@@ -1,13 +1,16 @@
 import { useEffect, useState } from "react";
+import { Save } from "lucide-react";
 import { useAuth } from "@/context/auth";
 import { getSettings, upsertSettings } from "@/lib/settings";
 import { DEFAULT_SETTINGS } from "@/types/database";
 import type { PractitionerSettings } from "@/types/database";
-import { Card } from "@/components/ui";
+import { Button, Card, Input } from "@/components/ui";
 
 type SettingsState = Omit<PractitionerSettings, "id" | "user_id" | "created_at" | "updated_at">;
 
-const TOGGLE_ROWS: { key: keyof SettingsState; label: string; description: string }[] = [
+type ToggleKey = Extract<keyof SettingsState, `${string}_enabled`>;
+
+const TOGGLE_ROWS: { key: ToggleKey; label: string; description: string }[] = [
   {
     key: "welcome_email_enabled",
     label: "Welcome Email",
@@ -45,11 +48,27 @@ const TOGGLE_ROWS: { key: keyof SettingsState; label: string; description: strin
   },
 ];
 
+// ── Price field validation (A4: keep string state, validate before save) ──
+
+function isValidPrice(value: string): boolean {
+  if (value.trim() === "") return false;
+  const n = Number(value);
+  return !isNaN(n) && n > 0 && isFinite(n);
+}
+
 export default function SettingsPage() {
   const { user } = useAuth();
   const [settings, setSettings] = useState<SettingsState>({ ...DEFAULT_SETTINGS });
   const [loadError, setLoadError] = useState<string | null>(null);
-  const [toggleErrors, setToggleErrors] = useState<Partial<Record<keyof SettingsState, string>>>({});
+  const [toggleErrors, setToggleErrors] = useState<Partial<Record<ToggleKey, string>>>({});
+
+  // Price editing — string state to handle empty/partial input (A4)
+  const [priceStandard, setPriceStandard] = useState("");
+  const [pricePremium, setPricePremium] = useState("");
+  const [priceVip, setPriceVip] = useState("");
+  const [priceSaving, setPriceSaving] = useState(false);
+  const [priceError, setPriceError] = useState<string | null>(null);
+  const [priceSaved, setPriceSaved] = useState(false);
 
   useEffect(() => {
     if (!user) return;
@@ -67,12 +86,18 @@ export default function SettingsPage() {
           lead_day3_enabled: data.lead_day3_enabled,
           lead_day7_enabled: data.lead_day7_enabled,
           lead_day12_enabled: data.lead_day12_enabled,
+          price_standard: data.price_standard,
+          price_premium: data.price_premium,
+          price_vip: data.price_vip,
         });
+        setPriceStandard(String(data.price_standard));
+        setPricePremium(String(data.price_premium));
+        setPriceVip(String(data.price_vip));
       }
     });
   }, [user]);
 
-  async function handleToggle(key: keyof SettingsState) {
+  async function handleToggle(key: ToggleKey) {
     if (!user) return;
     const prev = settings[key];
     const next = !prev;
@@ -85,6 +110,34 @@ export default function SettingsPage() {
       setSettings((s) => ({ ...s, [key]: prev }));
       setToggleErrors((e) => ({ ...e, [key]: "Save failed. Please try again." }));
     }
+  }
+
+  const pricesValid =
+    isValidPrice(priceStandard) &&
+    isValidPrice(pricePremium) &&
+    isValidPrice(priceVip);
+
+  async function handlePriceSave() {
+    if (!user || !pricesValid) return;
+    setPriceSaving(true);
+    setPriceError(null);
+    setPriceSaved(false);
+
+    const update = {
+      price_standard: Number(priceStandard),
+      price_premium: Number(pricePremium),
+      price_vip: Number(priceVip),
+    };
+
+    const { error } = await upsertSettings(user.id, update);
+    if (error) {
+      setPriceError("Failed to save prices. Please try again.");
+    } else {
+      setSettings((s) => ({ ...s, ...update }));
+      setPriceSaved(true);
+      setTimeout(() => setPriceSaved(false), 3000);
+    }
+    setPriceSaving(false);
   }
 
   return (
@@ -100,6 +153,77 @@ export default function SettingsPage() {
         </div>
       )}
 
+      {/* Package Prices Card */}
+      <Card className="mb-6">
+        <div className="px-6 py-4 border-b border-divider">
+          <p className="text-xs font-medium uppercase tracking-wider text-text-muted">
+            Package Prices
+          </p>
+          <p className="text-xs text-text-secondary mt-0.5">
+            Current prices for new patient assignments. Existing patient deals are not affected.
+          </p>
+        </div>
+        <div className="px-6 py-4 space-y-4">
+          <div className="grid gap-4 sm:grid-cols-3">
+            <div>
+              <label className="block text-xs font-medium text-text-secondary mb-1">
+                Standard ($)
+              </label>
+              <Input
+                type="number"
+                min="1"
+                step="0.01"
+                value={priceStandard}
+                onChange={(e) => setPriceStandard(e.target.value)}
+                className={!isValidPrice(priceStandard) && priceStandard !== "" ? "border-coral" : ""}
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-text-secondary mb-1">
+                Premium ($)
+              </label>
+              <Input
+                type="number"
+                min="1"
+                step="0.01"
+                value={pricePremium}
+                onChange={(e) => setPricePremium(e.target.value)}
+                className={!isValidPrice(pricePremium) && pricePremium !== "" ? "border-coral" : ""}
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-text-secondary mb-1">
+                VIP ($)
+              </label>
+              <Input
+                type="number"
+                min="1"
+                step="0.01"
+                value={priceVip}
+                onChange={(e) => setPriceVip(e.target.value)}
+                className={!isValidPrice(priceVip) && priceVip !== "" ? "border-coral" : ""}
+              />
+            </div>
+          </div>
+          {priceError && (
+            <p className="text-xs text-coral">{priceError}</p>
+          )}
+          {priceSaved && (
+            <p className="text-xs text-teal">Prices saved successfully.</p>
+          )}
+          <Button
+            variant="primary"
+            size="sm"
+            onClick={handlePriceSave}
+            disabled={!pricesValid || priceSaving}
+          >
+            <Save className="h-4 w-4 mr-1.5" />
+            {priceSaving ? "Saving…" : "Save Prices"}
+          </Button>
+        </div>
+      </Card>
+
+      {/* Automation Toggles Card */}
       <Card className="divide-y divide-divider">
         <div className="px-6 py-4">
           <p className="text-xs font-medium uppercase tracking-wider text-text-muted">
@@ -107,7 +231,7 @@ export default function SettingsPage() {
           </p>
         </div>
         {TOGGLE_ROWS.map(({ key, label, description }) => {
-          const enabled = settings[key];
+          const enabled = settings[key] as boolean;
           return (
             <div key={key} className="flex items-center justify-between gap-4 px-6 py-4">
               <div className="min-w-0">
@@ -120,7 +244,7 @@ export default function SettingsPage() {
               <button
                 type="button"
                 role="switch"
-                aria-checked={enabled}
+                aria-checked={!!enabled}
                 aria-label={label}
                 onClick={() => handleToggle(key)}
                 className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-teal focus-visible:ring-offset-2 ${
