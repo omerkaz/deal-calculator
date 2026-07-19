@@ -120,7 +120,8 @@ wiring" (In development).
 - "Landing page's form should redirect to a survey" — needs spec; design
   together with DRIP-01 webhook so redirect + lead capture don't conflict.
 
-**Housekeeping:** ESLint not wired; GitHub remote misnamed `deal-calculator`;
+**Housekeeping (2026-07-19):** ESLint wired (flat config, react-hooks —
+found+fixed 2 real hook-dep bugs); remote renamed → `huseyinajuz-crm`;
 optional `_dmarc` TXT deferred to v1.3; `src/lib/email.ts` welcome template
 text fix rides next frontend deploy.
 </remaining_work>

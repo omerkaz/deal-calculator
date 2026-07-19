@@ -137,7 +137,7 @@ Any state → cold (except completed). cold → lead (re-engage).
 
 ### 6. Payment Status Derivation
 
-Payment status (`paid` / `partial` / `unpaid`) is **computed at read time** from the sum of payment records vs `PACKAGE_PRICES` — no stored status column. When `package_type` is null, any payment = `paid`, no payment = `unpaid`.
+Payment status (`paid` / `partial` / `unpaid`) is **computed at read time** from the sum of payment records vs the patient's `agreed_price` (price-at-sale snapshot, PRICE-01) — no stored status column, cents-based comparison. Current tier prices live in `practitioner_settings` (`price_standard/premium/vip`, editable in Settings) and are snapshotted onto `agreed_price` at package assignment. DB CHECK enforces `(package_type IS NULL) = (agreed_price IS NULL)`. When `package_type` is null, any payment = `paid`, no payment = `unpaid` (D008).
 
 ### 7. Auth Flow
 
@@ -202,12 +202,14 @@ Domain components import directly: `@/components/patients/StateTransitionButton`
 
 ## Database Schema
 
-4 tables in `supabase/schema.sql`:
+6 tables in `supabase/schema.sql`:
 
-- **patients** — core record with lifecycle_state, package_type, manychat_id (unique), phone validation fields
+- **patients** — core record with lifecycle_state, package_type, `agreed_price` (price-at-sale), manychat_id (unique), phone validation fields
 - **patient_notes** — timestamped text notes, cascade-delete with patient
 - **patient_attachments** — metadata rows pointing to Storage files, cascade-delete
 - **payments** — amount (numeric 10,2), currency, method, date, reference
+- **practitioner_settings** — single row (D014): 7 email toggles + 3 tier prices
+- **email_send_log** — at-least-once reminder accounting (patient_id, feature, sent_at)
 
 All have RLS enabled. `updated_at` trigger auto-fires on patients.
 
@@ -295,7 +297,7 @@ npm run preview
 
 All 6 slices delivered. 116 modules, 0 TypeScript errors. 12 node:test assertions pass.
 
-**Known gaps:** ESLint not yet wired.
+**Known gaps:** none — ESLint wired 2026-07-19.
 
 ### M002: Automation & Polish — ✅ COMPLETE + HARDENED (2026-07-06)
 

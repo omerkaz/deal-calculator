@@ -17,7 +17,7 @@ progress:
 
 **Last updated:** 2026-07-19
 **Current milestone:** v1.2 Deliverability & Landing Page Drip (in progress)
-**Current phase:** Phase 13 Done (human-verified); Phase 15 blocked, Phase 16 next
+**Current phase:** Phases 13 + 17 Done; Phase 15 blocked, Phase 16 next
 
 ## Current Position
 
