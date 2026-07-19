@@ -30,12 +30,16 @@ create table if not exists patients (
       'week_6_checkin', 'end_review', 'extended_support', 'completed', 'cold'
     )),
   package_type  text check (package_type in ('standard', 'premium', 'vip')),
+  agreed_price  numeric(10,2) default null
+    check (agreed_price >= 0),
   notes_text    text,
   manychat_id   text unique,
   instagram_username text,
   created_by    uuid not null references auth.users(id),
   created_at    timestamptz not null default now(),
-  updated_at    timestamptz not null default now()
+  updated_at    timestamptz not null default now(),
+  constraint chk_agreed_price_package_sync
+    check ((package_type IS NULL) = (agreed_price IS NULL))
 );
 
 create trigger patients_updated_at
@@ -152,8 +156,13 @@ create table if not exists practitioner_settings (
   lead_day3_enabled           boolean not null default false,
   lead_day7_enabled           boolean not null default false,
   lead_day12_enabled          boolean not null default false,
+  price_standard              numeric(10,2) not null default 297,
+  price_premium               numeric(10,2) not null default 497,
+  price_vip                   numeric(10,2) not null default 797,
   created_at                  timestamptz not null default now(),
-  updated_at                  timestamptz not null default now()
+  updated_at                  timestamptz not null default now(),
+  constraint chk_prices_positive
+    check (price_standard > 0 AND price_premium > 0 AND price_vip > 0)
 );
 
 create trigger practitioner_settings_updated_at
