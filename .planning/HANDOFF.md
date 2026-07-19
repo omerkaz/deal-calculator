@@ -101,9 +101,11 @@ single-file Netlify site as source (`index.html`, pre-processing version
 with `data-netlify="true"`); README documents the booking-form fields —
 the DRIP-01 webhook contract (name, email, phone, country,
 package/selected_package, subject, notes/booking_details, honeypot
-bot-field). Netlify continuous-deploy linking IN PROGRESS by user (branch
-main, no build, publish dir `/`); until confirmed, no drag-and-drop
-deploys. Known live bug: transformation-1/2/3.jpg + your-photo.jpg 404
+bot-field). Netlify continuous deploy LIVE (linked by user 2026-07-19,
+verified: 200, byte-identical, booking form processed — submissions
+intact). All landing edits now go repo → push main → auto-deploy; no env
+vars needed (static, Netlify Forms zero-config, GA ID public). Known live
+bug: transformation-1/2/3.jpg + your-photo.jpg 404
 (never uploaded). Board card: "Chore: Landing page repo + Netlify git
 wiring" (In development).
 
