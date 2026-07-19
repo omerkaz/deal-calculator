@@ -95,6 +95,18 @@ Phase 15 drip templates should adopt this design.
 Day-20 discount (amount/code), email copy approval flow, whether ManyChat
 leads get the drip. Then discuss-phase 15 → plan → execute.
 
+**Landing page repo (2026-07-19):** landing lives in a DISTINCT repo —
+`github.com/omerkaz/huseyinajuz-landing` (private). Adopted the live
+single-file Netlify site as source (`index.html`, pre-processing version
+with `data-netlify="true"`); README documents the booking-form fields —
+the DRIP-01 webhook contract (name, email, phone, country,
+package/selected_package, subject, notes/booking_details, honeypot
+bot-field). Netlify continuous-deploy linking IN PROGRESS by user (branch
+main, no build, publish dir `/`); until confirmed, no drag-and-drop
+deploys. Known live bug: transformation-1/2/3.jpg + your-photo.jpg 404
+(never uploaded). Board card: "Chore: Landing page repo + Netlify git
+wiring" (In development).
+
 **Board follow-ups (synced 2026-07-19, all 23 cards have Project):**
 - RESOLVED: "Country code will be mandatory" + "All clients mails should be
   separated" → both Landing Page (user confirmed; changes already made on
