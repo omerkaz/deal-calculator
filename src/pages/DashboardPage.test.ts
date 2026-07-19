@@ -19,12 +19,14 @@ function patient(overrides: Partial<Patient> & { id: string; lifecycle_state: Pa
     language: "en",
     country: null,
     package_type: null,
+    agreed_price: null,
     notes_text: null,
     manychat_id: null,
     instagram_username: null,
     created_by: "user-1",
     created_at: "2025-01-01T00:00:00Z",
     updated_at: "2025-01-01T00:00:00Z",
+    state_changed_at: null,
     ...overrides,
   };
 }
