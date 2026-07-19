@@ -90,7 +90,7 @@ export function PaymentsList({ patientId, packageType, agreedPrice }: PaymentsLi
     }
 
     setLoading(false);
-  }, [patientId, packageType]);
+  }, [patientId, packageType, agreedPrice]);
 
   useEffect(() => {
     void fetchData();

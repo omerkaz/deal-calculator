@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Activity, CreditCard, Loader2, TrendingUp, Users } from "lucide-react";
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui";
@@ -129,7 +129,7 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  async function fetchMetrics() {
+  const fetchMetrics = useCallback(async () => {
     if (!user) return;
     setLoading(true);
     setError(null);
@@ -157,11 +157,11 @@ export default function DashboardPage() {
     const payments = paymentsResult.error ? [] : paymentsResult.data;
     setMetrics(computeMetrics(patientsResult.data, payments));
     setLoading(false);
-  }
+  }, [user]);
 
   useEffect(() => {
     void fetchMetrics();
-  }, [user]);
+  }, [fetchMetrics]);
 
   if (loading) {
     return (
