@@ -69,9 +69,11 @@ export default function PatientDetailPage() {
 
   useEffect(() => {
     if (!patient) return;
-    void getPatientPaymentSummary(patient.id, patient.package_type as PackageType | null).then(
-      ({ data }) => setPaymentSummary(data),
-    );
+    void getPatientPaymentSummary(
+      patient.id,
+      patient.package_type as PackageType | null,
+      patient.agreed_price ?? null,
+    ).then(({ data }) => setPaymentSummary(data));
   }, [patient]);
 
   async function handleDelete() {
@@ -269,6 +271,7 @@ export default function PatientDetailPage() {
         <PaymentsList
           patientId={patient.id}
           packageType={patient.package_type as PackageType | null}
+          agreedPrice={patient.agreed_price ?? null}
         />
       </Card>
 

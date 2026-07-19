@@ -6,7 +6,6 @@ import { PatientFilters } from "@/components/patients/PatientFilters";
 import { getPatients } from "@/lib/patients";
 import { getPayments } from "@/lib/payments";
 import type { LifecycleState, PackageType, Patient, Payment, PaymentStatus } from "@/types/database";
-import { PACKAGE_PRICES } from "@/types/database";
 import { Loader2, Plus, Users } from "lucide-react";
 
 const paymentStatusVariant: Record<PaymentStatus, "teal" | "coral" | "muted"> = {
@@ -31,25 +30,24 @@ function computePaymentStatusMap(
     byPatient.set(p.patient_id, (byPatient.get(p.patient_id) ?? 0) + Number(p.amount));
   }
 
-  // Build patient id -> package_type lookup
-  const packageMap = new Map<string, PackageType | null>();
-  for (const pt of patients) {
-    packageMap.set(pt.id, pt.package_type);
-  }
-
-  // Compute status per patient
+  // Compute status per patient using agreed_price (PRICE-01)
   const statusMap = new Map<string, PaymentStatus>();
   for (const pt of patients) {
     const totalPaid = byPatient.get(pt.id) ?? 0;
-    const pkgType = packageMap.get(pt.id) ?? null;
 
-    if (pkgType === null) {
+    if (pt.package_type === null) {
+      // D008: no package → any payment = paid, none = unpaid
+      statusMap.set(pt.id, totalPaid > 0 ? "paid" : "unpaid");
+    } else if (pt.agreed_price === null) {
+      // Fallback (shouldn't happen after migration)
       statusMap.set(pt.id, totalPaid > 0 ? "paid" : "unpaid");
     } else {
-      const price = PACKAGE_PRICES[pkgType];
-      if (totalPaid >= price) {
+      // Cents-based comparison (A3)
+      const paidCents = Math.round(totalPaid * 100);
+      const targetCents = Math.round(pt.agreed_price * 100);
+      if (paidCents >= targetCents) {
         statusMap.set(pt.id, "paid");
-      } else if (totalPaid > 0) {
+      } else if (paidCents > 0) {
         statusMap.set(pt.id, "partial");
       } else {
         statusMap.set(pt.id, "unpaid");

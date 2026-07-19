@@ -6,7 +6,6 @@ import type {
   PaymentSummary,
   PackageType,
 } from "@/types/database";
-import { PACKAGE_PRICES } from "@/types/database";
 
 export async function getPatientPayments(
   patientId: string,
@@ -91,6 +90,7 @@ export async function deletePayment(
 export async function getPatientPaymentSummary(
   patientId: string,
   packageType: PackageType | null,
+  agreedPrice: number | null,
 ): Promise<{ data: PaymentSummary; error: Error | null }> {
   const { data: payments, error } = await getPatientPayments(patientId);
 
@@ -107,13 +107,19 @@ export async function getPatientPaymentSummary(
   let status: PaymentSummary["status"];
 
   if (packageType === null) {
-    // No package selected — if they've paid anything, consider it paid
+    // D008: No package selected — if they've paid anything, consider it paid
+    status = paymentCount > 0 ? "paid" : "unpaid";
+  } else if (agreedPrice === null) {
+    // Edge case: package set but no agreed_price (shouldn't happen after migration)
+    // Fall back to D008 semantics
     status = paymentCount > 0 ? "paid" : "unpaid";
   } else {
-    const price = PACKAGE_PRICES[packageType];
-    if (totalPaid >= price) {
+    // Compare in cents to avoid floating point issues (A3)
+    const paidCents = Math.round(totalPaid * 100);
+    const targetCents = Math.round(agreedPrice * 100);
+    if (paidCents >= targetCents) {
       status = "paid";
-    } else if (totalPaid > 0) {
+    } else if (paidCents > 0) {
       status = "partial";
     } else {
       status = "unpaid";

@@ -4,11 +4,13 @@ import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui";
 import { getPatients } from "@/lib/patients";
 import { getPayments } from "@/lib/payments";
+import { getSettings } from "@/lib/settings";
+import { useAuth } from "@/context/auth";
 import { computeMetrics, formatUSD, type DashboardMetrics } from "@/lib/dashboardMetrics";
 import {
+  DEFAULT_SETTINGS,
   LIFECYCLE_LABELS,
   LIFECYCLE_STATES,
-  PACKAGE_PRICES,
   type LifecycleState,
   type PackageType,
 } from "@/types/database";
@@ -77,11 +79,14 @@ function RevenueSummary({
   revenueTotal,
   revenueThisMonth,
   revenueByPackage,
-}: Pick<DashboardMetrics, "revenueTotal" | "revenueThisMonth" | "revenueByPackage">) {
+  packagePrices,
+}: Pick<DashboardMetrics, "revenueTotal" | "revenueThisMonth" | "revenueByPackage"> & {
+  packagePrices: Record<PackageType, number>;
+}) {
   const packageEntries: Array<{ key: PackageType; label: string; price: number }> = [
-    { key: "standard", label: "Standard", price: PACKAGE_PRICES.standard },
-    { key: "premium", label: "Premium", price: PACKAGE_PRICES.premium },
-    { key: "vip", label: "VIP", price: PACKAGE_PRICES.vip },
+    { key: "standard", label: "Standard", price: packagePrices.standard },
+    { key: "premium", label: "Premium", price: packagePrices.premium },
+    { key: "vip", label: "VIP", price: packagePrices.vip },
   ];
 
   return (
@@ -114,23 +119,39 @@ function RevenueSummary({
 // ── Page ──
 
 export default function DashboardPage() {
+  const { user } = useAuth();
   const [metrics, setMetrics] = useState<DashboardMetrics | null>(null);
+  const [packagePrices, setPackagePrices] = useState<Record<PackageType, number>>({
+    standard: DEFAULT_SETTINGS.price_standard,
+    premium: DEFAULT_SETTINGS.price_premium,
+    vip: DEFAULT_SETTINGS.price_vip,
+  });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   async function fetchMetrics() {
+    if (!user) return;
     setLoading(true);
     setError(null);
 
-    const [patientsResult, paymentsResult] = await Promise.all([
+    const [patientsResult, paymentsResult, settingsResult] = await Promise.all([
       getPatients(),
       getPayments(),
+      getSettings(user.id),
     ]);
 
     if (patientsResult.error) {
       setError(patientsResult.error.message);
       setLoading(false);
       return;
+    }
+
+    if (settingsResult.data) {
+      setPackagePrices({
+        standard: settingsResult.data.price_standard,
+        premium: settingsResult.data.price_premium,
+        vip: settingsResult.data.price_vip,
+      });
     }
 
     const payments = paymentsResult.error ? [] : paymentsResult.data;
@@ -140,7 +161,7 @@ export default function DashboardPage() {
 
   useEffect(() => {
     void fetchMetrics();
-  }, []);
+  }, [user]);
 
   if (loading) {
     return (
@@ -186,6 +207,7 @@ export default function DashboardPage() {
           revenueTotal={m.revenueTotal}
           revenueThisMonth={m.revenueThisMonth}
           revenueByPackage={m.revenueByPackage}
+          packagePrices={packagePrices}
         />
       </div>
     </div>

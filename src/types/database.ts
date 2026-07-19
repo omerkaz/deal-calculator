@@ -74,6 +74,7 @@ export interface Patient {
   country: string | null;
   lifecycle_state: LifecycleState;
   package_type: PackageType | null;
+  agreed_price: number | null;
   notes_text: string | null;
   manychat_id: string | null;
   instagram_username: string | null;
@@ -83,10 +84,11 @@ export interface Patient {
   state_changed_at: string | null;
 }
 
-export type PatientInsert = Omit<Patient, "id" | "created_at" | "updated_at" | "manychat_id" | "instagram_username" | "state_changed_at"> & {
+export type PatientInsert = Omit<Patient, "id" | "created_at" | "updated_at" | "manychat_id" | "instagram_username" | "state_changed_at" | "agreed_price"> & {
   manychat_id?: string | null;
   instagram_username?: string | null;
   state_changed_at?: string | null;
+  agreed_price?: number | null;
 };
 export type PatientUpdate = Partial<Omit<Patient, "id" | "created_at" | "updated_at" | "created_by">>;
 
@@ -128,13 +130,20 @@ export const PAYMENT_METHOD_LABELS: Record<PaymentMethod, string> = {
   bank_transfer: "Bank Transfer",
 };
 
-// ── Package Prices (USD) ──
+// ── Package Price Utility ──
 
-export const PACKAGE_PRICES: Record<PackageType, number> = {
-  standard: 197,
-  premium: 297,
-  vip: 497,
-};
+/** Resolve the current price for a package type from settings */
+export function getPackagePrice(
+  settings: Pick<PractitionerSettings, "price_standard" | "price_premium" | "price_vip">,
+  packageType: PackageType,
+): number {
+  const map: Record<PackageType, number> = {
+    standard: settings.price_standard,
+    premium: settings.price_premium,
+    vip: settings.price_vip,
+  };
+  return map[packageType];
+}
 
 // ── Payment ──
 
@@ -172,6 +181,9 @@ export interface PractitionerSettings {
   lead_day3_enabled: boolean;
   lead_day7_enabled: boolean;
   lead_day12_enabled: boolean;
+  price_standard: number;
+  price_premium: number;
+  price_vip: number;
   created_at: string;
   updated_at: string;
 }
@@ -191,4 +203,7 @@ export const DEFAULT_SETTINGS: Omit<
   lead_day3_enabled: false,
   lead_day7_enabled: false,
   lead_day12_enabled: false,
+  price_standard: 297,
+  price_premium: 497,
+  price_vip: 797,
 } as const;

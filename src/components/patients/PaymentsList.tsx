@@ -53,9 +53,10 @@ const STATUS_LABELS: Record<PaymentSummary["status"], string> = {
 interface PaymentsListProps {
   patientId: string;
   packageType: PackageType | null;
+  agreedPrice: number | null;
 }
 
-export function PaymentsList({ patientId, packageType }: PaymentsListProps) {
+export function PaymentsList({ patientId, packageType, agreedPrice }: PaymentsListProps) {
   const { user } = useAuth();
 
   const [payments, setPayments] = useState<Payment[]>([]);
@@ -74,7 +75,7 @@ export function PaymentsList({ patientId, packageType }: PaymentsListProps) {
   const fetchData = useCallback(async () => {
     const [paymentsRes, summaryRes] = await Promise.all([
       getPatientPayments(patientId),
-      getPatientPaymentSummary(patientId, packageType),
+      getPatientPaymentSummary(patientId, packageType, agreedPrice),
     ]);
 
     if (paymentsRes.error) {
