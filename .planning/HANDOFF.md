@@ -1,7 +1,7 @@
 ---
 status: v1.2_phase_16_next
 last_updated: 2026-07-19
-next_action: Discuss/plan Phase 16 (Email Design System — unblocked). Also pending from Hüseyin/user — Phase 15 answers (discount, copy flow, ManyChat overlap), price-versioning strategy decision (PRICE-01).
+next_action: Discuss/plan Phase 16 (Email Design System — unblocked). Phase 15 still blocked on Hüseyin's input. PRICE-01 is DONE.
 ---
 
 # Session Handoff — Hüseyin Ajuz Patient CRM
@@ -9,17 +9,30 @@ next_action: Discuss/plan Phase 16 (Email Design System — unblocked). Also pen
 Boot order for a fresh session: read `CLAUDE.md` → this file → `.planning/STATE.md` → `.planning/ROADMAP.md`.
 
 <current_state>
-Milestone **v1.2 Deliverability & Landing Page Drip** — 3 of 5 phases shipped
+Milestone **v1.2 Deliverability & Landing Page Drip** — 4 of 6 phases shipped
 (2026-07-19). Phase 12 (Domain & DNS) DONE. Phase 13 (Verified Sender
-Identity) DONE: send-email v3 deployed, `mrhus@huseyinacuz.com` sender,
-footer injection, 7/7 Gmail delivery human-verified. Phase 14 (Reliable
-Reminders) DONE. Phase 15 (Landing Page Drip) blocked on Hüseyin's input.
-Phase 16 (Email Design System) added and UNBLOCKED — next-eligible.
-MAIL-01 ✓ MAIL-02 ✓ MAIL-03 ✓ MAIL-04 ✓; MAIL-05 lands in Phase 16.
-Repo not yet pushed (3 commits ahead of origin).
+Identity) DONE. Phase 14 (Reliable Reminders) DONE. Phase 17 (Package Price
+Management) DONE: prices editable in Settings, agreed_price snapshot on
+package assignment, cents-based derivation, 26 tests pass, migration live.
+Phase 15 (Landing Page Drip) blocked on Hüseyin's input.
+Phase 16 (Email Design System) UNBLOCKED — next-eligible.
+MAIL-01 ✓ MAIL-02 ✓ MAIL-03 ✓ MAIL-04 ✓ PRICE-01 ✓; MAIL-05 lands in Phase 16.
+Repo not yet pushed (8 commits ahead of origin).
 </current_state>
 
 <completed_work>
+**2026-07-19 session — Phase 17 execution (PRICE-01, single worker agent):**
+
+- **Phase 17 EXECUTED + CLOSED** (plan+execute `3b17631..280b4d2`, PRICE-01 ✓).
+  Package prices moved from hard-coded `PACKAGE_PRICES` constant to editable
+  `practitioner_settings` columns (D014). `patients.agreed_price` snapshotted
+  at package assignment; derivation uses cents-based integer comparison.
+  Settings page: Package Prices card (3 inputs + Save). PatientFormPage:
+  fresh-fetch at submit time (A2), editable for custom deals, disabled when
+  settings unavailable. DB CHECKs enforce invariants (package↔price sync,
+  prices > 0). Migration applied to live DB (0 patients → no backfill needed).
+  14 new test assertions + 12 existing = 26 pass. tsc clean.
+
 **2026-07-19 session — Phase 13 execution (single worker agent + orchestrator):**
 
 - **Phase 13 EXECUTED + CLOSED** (plan `f2e75b1`; feat `75ee9bc`; docs
@@ -87,12 +100,9 @@ leads get the drip. Then discuss-phase 15 → plan → execute.
   separated" → both Landing Page (user confirmed; changes already made on
   the landing page externally). Useful DRIP-01 spec input: landing form now
   has mandatory country code and per-client emails.
-- **PRICE-01 card created** (CRM, Not started): new tier prices standard
-  $297 / premium $497 / vip $797 are live on the landing page, but code
-  still has 197/297/497 (`PACKAGE_PRICES` in `src/types/database.ts`).
-  ⚠️ Payment status is computed at read time (D008): naive constant bump
-  flips historical fully-paid patients to "partial". Price-versioning /
-  price-at-sale strategy decision still PENDING — discuss before scheduling.
+- **PRICE-01 DONE** (Phase 17 shipped 2026-07-19): prices editable in
+  Settings, agreed_price snapshot on package assignment, historical statuses
+  protected by per-patient price, cents-based derivation, 26 tests pass.
 - "Landing page's form should redirect to a survey" — needs spec; design
   together with DRIP-01 webhook so redirect + lead capture don't conflict.
 
@@ -118,6 +128,12 @@ text fix rides next frontend deploy.
   guarantees all current + future emails get consistent branding (2026-07-19)
 - Phase 16 (Email Design System) positioned before Phase 15 — drip templates
   adopt the design system rather than shipping unstyled then retrofitting
+- Prices on practitioner_settings (not a new table) — D014 single-row pattern;
+  3 fixed PACKAGE_TYPES don’t warrant a join table (2026-07-19)
+- agreed_price snapshotted at assignment, not derived at read time — decouples
+  historical status from future price changes (2026-07-19)
+- Cents-based integer comparison in payment derivation — avoids floating-point
+  rounding errors on split payments (2026-07-19)
 </decisions_made>
 
 <operational_notes>

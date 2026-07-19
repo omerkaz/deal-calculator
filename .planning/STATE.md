@@ -6,11 +6,11 @@ status: in_progress
 last_updated: "2026-07-19T00:00:00.000Z"
 last_activity: 2026-07-19
 progress:
-  total_phases: 4
-  completed_phases: 3
-  total_plans: 4
-  completed_plans: 4
-  percent: 75
+  total_phases: 5
+  completed_phases: 4
+  total_plans: 5
+  completed_plans: 5
+  percent: 80
 ---
 
 # Project State
@@ -21,10 +21,10 @@ progress:
 
 ## Current Position
 
-Phase: 13 — Verified Sender Identity (DONE — human-verified 2026-07-19)
-Plans: 12-01 ✅, 13-01 ✅, 14-01 ✅, 14-02 ✅
-Status: send-email v3 deployed, 7/7 Gmail delivery confirmed, MAIL-01+MAIL-03 closed
-Last activity: 2026-07-19 — Phase 13 closed (human inbox verification passed)
+Phase: 17 — Package Price Management (DONE 2026-07-19)
+Plans: 12-01 ✅, 13-01 ✅, 14-01 ✅, 14-02 ✅, 17-01 ✅
+Status: PRICE-01 complete — prices editable, agreed_price live, 26 tests pass
+Last activity: 2026-07-19 — Phase 17 executed (5 commits)
 Next code-ready work: Phase 16 (Email Design System — unblocked)
 
 ## Phase Status
@@ -36,6 +36,7 @@ Next code-ready work: Phase 16 (Email Design System — unblocked)
 | 14 | Reliable Reminders | ✅ Executed (migration applied to live DB) |
 | 15 | Landing Page Drip Sequence | ⏳ Pending (blocked on Hüseyin's input) |
 | 16 | Email Design System | 🔜 Unblocked (next-eligible) |
+| 17 | Package Price Management | ✅ Done (PRICE-01, 2026-07-19) |
 
 ## Verified Production State (2026-07-06)
 
@@ -47,6 +48,10 @@ Next code-ready work: Phase 16 (Email Design System — unblocked)
 - Repo `main` in sync with origin; build passes
 
 ## Accumulated Context
+
+### Roadmap Evolution
+- Phase 17 added: Package Price Management (PRICE-01)
+- Phase 17 executed: 5 commits, 26 tests pass, migration live
 
 - Edge Function env has NO `PRACTITIONER_USER_ID` — functions resolve the
   practitioner from the `practitioner_settings` row (D015). Setting the env var
